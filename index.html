@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>صانع الأسئلة السريع</title>
+  <title>صانع الأسئلة الامتحانية</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root { --primary: #1976d2; --bg: #f4f6f9; --card-bg: #ffffff; --border: #dcdfe6; }
-    * { box-sizing: border-box; font-family: system-ui, sans-serif; }
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { margin: 0; padding: 16px; background-color: var(--bg); color: #333; }
     .container { max-width: 800px; margin: 0 auto; }
     .card { background: var(--card-bg); padding: 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 16px; }
@@ -14,92 +15,318 @@
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
     .form-group { margin-bottom: 10px; }
     label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px; color: #555; }
-    input[type="text"], textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; }
+    input[type="text"], textarea, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; }
     .question-block { border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 12px; background: #fafafa; }
     .btn { display: inline-block; padding: 10px 16px; font-size: 14px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; }
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-success { background: #2e7d32; color: #fff; }
     .btn-danger { background: #e53935; color: #fff; padding: 6px 10px; font-size: 12px; }
+    .btn-warning { background: #f39c12; color: #fff; }
     .toolbar-btn { background: #eee; border: 1px solid #ccc; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer; margin-left: 4px; margin-bottom: 4px; }
     .actions-bar { display: flex; gap: 8px; margin-top: 16px; }
-    #paper-preview { display: none; background: #fff; padding: 24px; border: 2px solid #333; border-radius: 4px; margin-top: 20px; }
-    .paper-header { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 16px; display: flex; justify-content: space-between; font-size: 13px; }
-    .exam-title { font-size: 16px; font-weight: bold; text-decoration: underline; }
-    @media print {
-      body * { visibility: hidden; }
-      #paper-preview, #paper-preview * { visibility: visible; }
-      #paper-preview { display: block !important; position: absolute; left: 0; top: 0; width: 100%; border: none; padding: 0; }
-      .actions-bar, .card, h2 { display: none !important; }
+    
+    #paper-preview { 
+      display: none; background: #fff; color: #000;
+      border: 3px solid #000; outline: 1px solid #000; outline-offset: -8px;
+      padding: 30px; margin: 20px auto; direction: rtl; text-align: right; flex-direction: column;
     }
+    
+    .size-A4 { width: 210mm; min-height: 297mm; }
+    .size-A5 { width: 148mm; min-height: 210mm; font-size: 90%; }
+    
+    @media print {
+      @page { margin: 0; } 
+      body { background-color: #fff; padding: 0; margin: 0; display: flex; justify-content: center; }
+      body * { visibility: hidden; }
+      #editor-ui { display: none !important; }
+      #paper-preview, #paper-preview * { visibility: visible; }
+      #paper-preview { 
+        display: flex !important; position: absolute; left: 0; top: 0; margin: 0 !important; transform-origin: top center;
+      }
+      .size-A4 { width: 210mm; min-height: 295mm; }
+      .size-A5 { width: 148mm; min-height: 208mm; }
+    }
+    
+    .paper-header { border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: flex-start; font-size: 15px; font-weight: bold; line-height: 1.6; }
+    .header-right { text-align: right; flex: 1; }
+    .header-center { text-align: center; flex: 1.5; }
+    .header-left { text-align: left; flex: 1; }
+    .exam-type-title { font-size: 22px; text-decoration: underline; margin-bottom: 6px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>📝 صانع الأسئلة الامتحانية</h2>
-    <div class="card">
-      <h3>بيانات الامتحان (الترويسة)</h3>
-      <div class="grid">
-        <div class="form-group"><label>اسم المدرسة</label><input type="text" id="school" placeholder="مدرسة الأمل"></div>
-        <div class="form-group"><label>المادة</label><input type="text" id="subject" placeholder="الرياضيات"></div>
-        <div class="form-group"><label>الصف والشعبة</label><input type="text" id="grade" placeholder="الخامس الابتدائي"></div>
-        <div class="form-group"><label>العام الدراسي</label><input type="text" id="year" placeholder="2026/2027"></div>
-        <div class="form-group"><label>الوقت</label><input type="text" id="examTime" placeholder="ساعتان"></div>
+    <div id="editor-ui">
+        <h2>📝 صانع الأسئلة الامتحانية</h2>
+        
+        <div class="card">
+          <h3>إعدادات الورقة</h3>
+          <div class="grid">
+            <div class="form-group">
+              <label>حجم الورقة</label>
+              <select id="paperSize">
+                <option value="A4">A4 - ورقة كاملة</option>
+                <option value="A5">A5 - نصف ورقة</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>نوع الأرقام</label>
+              <select id="numFormat">
+                <option value="in">أرقام هندية (١، ٢، ٣) - للمرحلة الابتدائية</option>
+                <option value="ar">أرقام عربية (1, 2, 3) - للمتوسطة والإعدادية</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h3>بيانات الامتحان (الترويسة)</h3>
+          <div class="grid">
+            <div class="form-group"><label>اسم المدرسة</label><input type="text" id="school" placeholder="مدرسة الأمل"></div>
+            <div class="form-group"><label>نوع الامتحان</label><input type="text" id="examType" placeholder="امتحانات الشهر الأول"></div>
+            <div class="form-group"><label>المادة</label><input type="text" id="subject" placeholder="العلوم"></div>
+            <div class="form-group"><label>الصف والشعبة</label><input type="text" id="grade" placeholder="الخامس الابتدائي"></div>
+            <div class="form-group"><label>العام الدراسي</label><input type="text" id="year" placeholder="2026/2027"></div>
+            <div class="form-group"><label>التاريخ</label><input type="text" id="examDate" placeholder="2026/11/1"></div>
+            <div class="form-group"><label>الوقت</label><input type="text" id="examTime" placeholder="ساعة ونصف"></div>
+          </div>
+          <div class="form-group" style="margin-top: 5px;">
+            <label>الملاحظة (اختياري)</label>
+            <input type="text" id="examNote" placeholder="ملاحظة // أجب عن جميع الأسئلة">
+          </div>
+        </div>
+        
+        <div class="card">
+          <h3>الأسئلة</h3>
+          <div id="q-container"></div>
+          <button class="btn btn-primary" onclick="addQ()">➕ إضافة سؤال جديد</button>
+        </div>
+        
+        <div class="actions-bar">
+          <button class="btn btn-success" style="flex:1; font-size: 16px;" onclick="printPaper()">🖨️️ معاينة وطباعة PDF</button>
+          <button class="btn btn-warning" style="flex:1; font-size: 16px;" onclick="saveImage()">🖼️ حفظ كصورة</button>
+        </div>
+    </div>
+    
+    <div id="paper-preview" class="size-A4">
+      <div>
+          <div class="paper-header">
+            <div class="header-right">
+              جمهورية العراق<br>وزارة التربية<br>المدرسة: <span id="pv-school"></span>
+            </div>
+            <div class="header-center">
+              <div class="exam-type-title" id="pv-type"></div>
+              للعام الدراسي <span id="pv-year"></span><br>
+              الصف: <span id="pv-grade"></span>
+            </div>
+            <div class="header-left">
+              المادة: <span id="pv-subject"></span><br>
+              التاريخ: <span id="pv-date"></span><br>
+              الوقت: <span id="pv-time"></span>
+            </div>
+          </div>
+          <div id="pv-note-container" style="margin-bottom: 20px; font-weight: bold; font-size: 16px; display: none;">
+            <span id="pv-note"></span>
+          </div>
+          
+          <div id="pv-qs"></div>
       </div>
-    </div>
-    <div class="card">
-      <h3>الأسئلة</h3>
-      <div id="q-container"></div>
-      <button class="btn btn-primary" onclick="addQ()">➕ إضافة سؤال جديد</button>
-    </div>
-    <div class="actions-bar">
-      <button class="btn btn-success" style="flex:1;" onclick="printPaper()">🖨️ طباعة أو حفظ PDF</button>
-    </div>
-    <div id="paper-preview">
-      <div class="paper-header">
-        <div style="text-align: right;">جمهورية العراق<br>وزارة التربية<br><span id="pv-school"></span></div>
-        <div style="text-align: center;"><div class="exam-title">أسئلة الامتحانات</div><span id="pv-year"></span><br><span id="pv-grade"></span></div>
-        <div style="text-align: left;"><span id="pv-subject"></span><br><span id="pv-time"></span><br>ملاحظة: أجب عن جميع الأسئلة</div>
+      
+      <div style="margin-top: auto; text-align: center; font-weight: bold; font-size: 18px; padding-top: 30px;">
+        (تمنياتنا لكم بالنجاح والتوفيق)
       </div>
-      <div id="pv-qs"></div>
     </div>
   </div>
+  
   <script>
     let count = 0;
+    let activeInput = null;
+    
+    document.addEventListener('focusin', function(e) {
+      if(e.target.tagName === 'TEXTAREA' || (e.target.tagName === 'INPUT' && e.target.type === 'text')) {
+        activeInput = e.target;
+      }
+    });
+
     function addQ() {
       count++;
       let div = document.createElement('div');
       div.className = 'question-block';
-      div.innerHTML = `<strong>س${count}</strong> 
-      <button class="btn btn-danger" onclick="this.parentElement.remove()">حذف</button><br><br>
-      <button type="button" class="toolbar-btn" onclick="insertSym(this, ' .................... ')">➕ فراغ</button>
-      <button type="button" class="toolbar-btn" onclick="insertSym(this, ' ÷ ')">÷</button>
-      <button type="button" class="toolbar-btn" onclick="insertSym(this, ' × ')">×</button>
-      <button type="button" class="toolbar-btn" onclick="insertSym(this, ' √ ')">√</button><br>
-      <textarea rows="2" class="q-text" placeholder="اكتب السؤال هنا..."></textarea>`;
+      div.innerHTML = "<div style='display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center;'>" +
+        "<div style='flex:1; display:flex; align-items:center;'>" +
+          "<strong style='margin-left: 10px;'>س" + count + "</strong>" +
+          "<input type='text' class='q-title' placeholder='صيغة السؤال (مثال: أجب عن فرعين)' style='width: 70%; padding: 6px; font-size: 13px; border-color: red; color: red;'>" +
+        "</div>" +
+        "<button type='button' class='btn btn-danger' onclick='this.parentElement.parentElement.remove()'>حذف</button>" +
+      "</div>" +
+      "<div style='margin-bottom: 8px;'>" +
+        "<button type='button' class='toolbar-btn' onmousedown='event.preventDefault(); insertSym(this, \" .................... \")'>➕ فراغ</button>" +
+        "<button type='button' class='toolbar-btn' onmousedown='event.preventDefault(); insertSym(this, \" ÷ \")'>÷</button>" +
+        "<button type='button' class='toolbar-btn' onmousedown='event.preventDefault(); insertSym(this, \" × \")'>×</button>" +
+        "<button type='button' class='toolbar-btn' onmousedown='event.preventDefault(); insertSym(this, \" √ \")'>√</button>" +
+      "</div>" +
+      "<textarea rows='2' class='q-text' placeholder='نص السؤال الرئيسي (اختياري)'></textarea>" +
+      "<div class='branches-container'></div>" +
+      "<div style='margin-top: 8px; text-align: right;'>" +
+        "<button type='button' class='btn' style='background: #e0e0e0; color: #333; padding: 6px 12px; font-size: 12px; border: 1px solid #ccc;' onclick='addBranch(this)'>" + 
+        "➕ إضافة فرع (أ، ب، ج)" + 
+        "</button>" +
+      "</div>";
       document.getElementById('q-container').appendChild(div);
     }
+    
+    function addBranch(btn) {
+      let container = btn.parentElement.previousElementSibling;
+      let branchCount = container.children.length;
+      let alphabet = ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح', 'ط', 'ي'];
+      let currentLetter = alphabet[branchCount] || '-';
+      
+      let branchDiv = document.createElement('div');
+      branchDiv.className = 'b-block';
+      branchDiv.style.marginTop = '10px';
+      branchDiv.style.padding = '10px';
+      branchDiv.style.border = '1px dashed #aaa';
+      branchDiv.style.borderRadius = '6px';
+      branchDiv.style.backgroundColor = '#f0f4f8';
+      
+      branchDiv.innerHTML = "<div style='display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center;'>" +
+        "<div style='flex:1; display:flex; align-items:center;'>" +
+          "<strong class='b-label' style='margin-left: 10px;'>فرع (" + currentLetter + ")</strong>" +
+          "<input type='text' class='b-title' placeholder='صيغة الفرع (مثال: علل ما يأتي)' style='width: 70%; padding: 6px; font-size: 13px; border-color: red; color: red;'>" +
+        "</div>" +
+        "<button type='button' class='btn btn-danger' style='padding: 4px 8px; font-size: 12px;' onclick='this.parentElement.parentElement.remove(); updateBranches(this.closest(\".branches-container\"));'>حذف</button>" +
+      "</div>" +
+      "<textarea rows='2' class='b-text' placeholder='اكتب نص الفرع هنا...' style='width: 100%; padding: 6px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px;'></textarea>";
+      
+      container.appendChild(branchDiv);
+    }
+    
+    function updateBranches(container) {
+      let alphabet = ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح', 'ط', 'ي'];
+      let blocks = container.querySelectorAll('.b-block');
+      blocks.forEach((block, index) => {
+        let label = block.querySelector('.b-label');
+        if(label) label.innerText = 'فرع (' + alphabet[index] + ')';
+      });
+    }
+    
     function insertSym(btn, sym) {
-      let ta = btn.parentElement.querySelector('.q-text');
+      let qBlock = btn.closest('.question-block');
+      let ta = (activeInput && qBlock.contains(activeInput)) ? activeInput : qBlock.querySelector('.q-text');
       let s = ta.selectionStart, e = ta.selectionEnd, v = ta.value;
       ta.value = v.substring(0, s) + sym + v.substring(e);
       ta.focus();
       ta.selectionEnd = s + sym.length;
     }
-    function printPaper() {
-      document.getElementById('pv-school').innerText = "المدرسة: " + document.getElementById('school').value;
-      document.getElementById('pv-subject').innerText = "المادة: " + document.getElementById('subject').value;
-      document.getElementById('pv-grade').innerText = "الصف: " + document.getElementById('grade').value;
-      document.getElementById('pv-year').innerText = document.getElementById('year').value;
-      document.getElementById('pv-time').innerText = "الوقت: " + document.getElementById('examTime').value;
+    
+    function toIndic(str) {
+      if(!str) return "";
+      if(document.getElementById('numFormat').value === 'in') {
+        const indic = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+        return str.toString().replace(/[0-9]/g, w => indic[w]);
+      }
+      return str;
+    }
+    
+    function preparePaper() {
+      let pSize = document.getElementById('paperSize').value;
+      let preview = document.getElementById('paper-preview');
+      preview.className = 'size-' + pSize;
+      
+      document.getElementById('pv-school').innerText = toIndic(document.getElementById('school').value);
+      document.getElementById('pv-type').innerText = toIndic(document.getElementById('examType').value);
+      document.getElementById('pv-subject').innerText = toIndic(document.getElementById('subject').value);
+      document.getElementById('pv-grade').innerText = toIndic(document.getElementById('grade').value);
+      document.getElementById('pv-year').innerText = toIndic(document.getElementById('year').value);
+      document.getElementById('pv-date').innerText = toIndic(document.getElementById('examDate').value);
+      document.getElementById('pv-time').innerText = toIndic(document.getElementById('examTime').value);
+      
+      let noteVal = document.getElementById('examNote').value;
+      let noteContainer = document.getElementById('pv-note-container');
+      if(noteVal.trim() !== "") {
+        document.getElementById('pv-note').innerText = toIndic(noteVal);
+        noteContainer.style.display = 'block';
+      } else {
+        noteContainer.style.display = 'none';
+      }
+      
       let pq = document.getElementById('pv-qs');
       pq.innerHTML = "";
-      let texts = document.querySelectorAll('.q-text');
-      texts.forEach((t, i) => {
-        if(t.value.trim() !== "") pq.innerHTML += `<p style="margin-bottom: 14px; font-size: 15px;"><strong>س\({i+1}: </strong>\){t.value}</p>`;
+      
+      let blocks = document.querySelectorAll('.question-block');
+      let validBlocks = Array.from(blocks).filter(b => b.querySelector('.q-text').value.trim() !== "" || b.querySelector('.q-title').value.trim() !== "" || b.querySelectorAll('.b-block').length > 0);
+      
+      validBlocks.forEach((b, i) => {
+        let qTitle = b.querySelector('.q-title').value.trim();
+        let qText = b.querySelector('.q-text').value;
+        let formattedText = toIndic(qText.replace(/\n/g, '<br>'));
+        let qNum = toIndic((i+1).toString());
+        
+        let borderStyle = (i === validBlocks.length - 1) ? "border-bottom: none;" : "border-bottom: 2px dashed #666;";
+        let titleHtml = qTitle ? "<span style='color: red; margin-right: 8px; font-size: 16px;'>" + toIndic(qTitle) + "</span>" : "";
+        let mainTextHtml = formattedText ? "<div style='font-size: 16px; line-height: 1.5; padding-right: 15px; margin-top: 4px;'>" + formattedText + "</div>" : "";
+        
+        let branchesHtml = "";
+        let bBlocks = b.querySelectorAll('.b-block');
+        let alphabet = ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح', 'ط', 'ي'];
+        let bIndex = 0;
+        
+        bBlocks.forEach(bb => {
+          let bTitleVal = bb.querySelector('.b-title').value.trim();
+          let bTextVal = bb.querySelector('.b-text').value;
+          
+          if(bTitleVal !== "" || bTextVal.trim() !== "") {
+            let bFormattedText = toIndic(bTextVal.replace(/\n/g, '<br>'));
+            let bTitleHtml = bTitleVal ? "<span style='color: red; margin-right: 8px; font-size: 16px;'>" + toIndic(bTitleVal) + "</span>" : "";
+            
+            branchesHtml += "<div style='margin-top: 12px; padding-right: 20px; font-size: 16px;'>" +
+              "<div style='margin-bottom: 4px;'>" + 
+                "<strong>" + alphabet[bIndex] + " / </strong>" + bTitleHtml + 
+              "</div>" +
+              "<div style='padding-right: 25px; line-height: 1.5;'>" + bFormattedText + "</div>" +
+            "</div>";
+            bIndex++;
+          }
+        });
+        
+        pq.innerHTML += "<div style='margin-bottom: 15px; padding-bottom: 15px; " + borderStyle + "'>" +
+          "<div style='margin-bottom: 8px;'>" +
+            "<strong style='font-size: 18px;'>س" + qNum + ": </strong> " + titleHtml +
+          "</div>" +
+          mainTextHtml +
+          branchesHtml +
+        "</div>";
       });
-      document.getElementById('paper-preview').style.display = 'block';
-      window.print();
     }
+
+    function printPaper() {
+      preparePaper();
+      document.getElementById('paper-preview').style.display = 'flex';
+      window.print();
+      document.getElementById('paper-preview').style.display = 'none';
+    }
+    
+    function saveImage() {
+      preparePaper();
+      let editor = document.getElementById('editor-ui');
+      let preview = document.getElementById('paper-preview');
+      
+      editor.style.display = 'none';
+      preview.style.display = 'flex';
+      
+      setTimeout(() => {
+        html2canvas(preview, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+          let link = document.createElement('a');
+          link.download = 'الأسئلة_الامتحانية.png';
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+          
+          editor.style.display = 'block';
+          preview.style.display = 'none';
+        });
+      }, 300);
+    }
+
     addQ();
   </script>
 </body>
