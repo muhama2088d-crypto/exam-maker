@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1976d2">
   <title>صانع الأسئلة الامتحانية | تبسيط التقنية</title>
   <link rel="manifest" href="manifest.json">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -65,7 +66,10 @@
 <body>
   <div class="container">
     <div id="editor-ui">
-        <h2>📝 صانع الأسئلة الامتحانية (التحديث الذهبي)</h2>
+        <h2 style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          📝 صانع الأسئلة الامتحانية
+          <button id="installBtn" class="btn" style="background: #e74c3c; color: white; display: none; padding: 8px 12px; font-size: 14px; border-radius: 8px; box-shadow: 0 4px 6px rgba(231,76,60,0.3);">📱 تثبيت كتطبيق</button>
+        </h2>
         
         <div class="card">
           <h3>إعدادات الورقة والمادة</h3>
@@ -100,7 +104,6 @@
               </select>
             </div>
             
-            <!-- قسم العلامة المائية الجديد (نص أو صورة) -->
             <div class="form-group" style="grid-column: 1 / -1; background: #fff3e0; padding: 12px; border-radius: 6px; border: 1px dashed #ffb74d;">
               <label style="color: #d84315;">شعار أو علامة مائية (في منتصف الورقة)</label>
               <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
@@ -302,7 +305,28 @@
   <script>
     let count = 0;
     let activeInput = null;
-    let uploadedWatermarkImage = null; // متغير لحفظ صورة الشعار
+    let uploadedWatermarkImage = null;
+    
+    // PWA Install Logic
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = 'inline-block';
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          installBtn.style.display = 'none';
+        }
+        deferredPrompt = null;
+      }
+    });
     
     document.addEventListener('focusin', function(e) {
       if(e.target.tagName === 'TEXTAREA' || (e.target.tagName === 'INPUT' && e.target.type === 'text')) {
@@ -310,7 +334,6 @@
       }
     });
 
-    // دالة تبديل نوع العلامة المائية
     function toggleWatermarkInput() {
         let type = document.getElementById('watermarkType').value;
         if(type === 'text') {
@@ -322,7 +345,6 @@
         }
     }
 
-    // دالة قراءة الصورة المرفوعة
     document.getElementById('watermarkImage').addEventListener('change', function(e) {
         let file = e.target.files[0];
         if(file) {
@@ -461,7 +483,6 @@
       preview.style.color = document.getElementById('textColor').value;
       preview.style.backgroundColor = document.getElementById('bgColor').value;
       
-      // تطبيق النقوش الفخمة (SVG)
       let pattern = document.getElementById('bgPattern').value;
       let pColor = document.getElementById('textColor').value.replace('#', '%23');
       
@@ -518,7 +539,6 @@
           document.getElementById('pv-dir-br').style.display = 'none';
       }
 
-      // تطبيق العلامة المائية الذكية (نص أو صورة)
       let watermarkElem = document.getElementById('pv-watermark');
       let wmType = document.getElementById('watermarkType').value;
       
@@ -535,7 +555,7 @@
           if(uploadedWatermarkImage) {
               watermarkElem.style.display = 'flex';
               watermarkElem.innerHTML = "<img src='" + uploadedWatermarkImage + "' style='max-width: 60%; max-height: 60%; opacity: 0.15; object-fit: contain;'>";
-              watermarkElem.style.transform = 'translate(-50%, -50%)'; // إبقاء الشعار مستقيم
+              watermarkElem.style.transform = 'translate(-50%, -50%)'; 
           } else {
               watermarkElem.style.display = 'none';
           }
