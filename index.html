@@ -16,25 +16,29 @@
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
     .form-group { margin-bottom: 10px; }
     label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px; color: #555; }
-    input[type="text"], textarea, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; }
+    input[type="text"], input[type="number"], textarea, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; }
     .question-block { border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 12px; background: #fafafa; }
-    .btn { display: inline-block; padding: 10px 16px; font-size: 14px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; }
+    .btn { display: inline-block; padding: 10px 16px; font-size: 14px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: 0.2s; text-align: center; }
+    .btn:hover { opacity: 0.9; }
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-success { background: #2e7d32; color: #fff; }
     .btn-danger { background: #e53935; color: #fff; padding: 6px 10px; font-size: 12px; }
     .btn-warning { background: #f39c12; color: #fff; }
+    .btn-purple { background: #8e44ad; color: #fff; }
     .toolbar-btn { background: #eee; border: 1px solid #ccc; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer; margin-left: 4px; margin-bottom: 4px; }
-    .actions-bar { display: flex; gap: 8px; margin-top: 16px; }
+    .actions-bar { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
     
     #paper-preview { 
-      display: none; background: #fff; color: #000;
-      border: 3px solid #000; outline: 1px solid #000; outline-offset: -8px;
-      padding: 30px; margin: 20px auto; direction: rtl; text-align: right; flex-direction: column; position: relative; overflow: hidden;
+      display: none; background-color: #fff; color: #000;
+      border: 3px solid currentColor; outline: 1px solid currentColor; outline-offset: -8px;
+      padding: 30px; margin: 20px auto; direction: rtl; text-align: right; 
+      flex-direction: column; position: relative; overflow: hidden;
+      font-size: 16px; background-size: auto; background-repeat: repeat; background-position: center;
     }
     
-    .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 80px; color: rgba(0,0,0,0.06); white-space: nowrap; pointer-events: none; z-index: 0; font-weight: bold; display: none; }
+    .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 80px; color: rgba(0,0,0,0.06); white-space: nowrap; pointer-events: none; z-index: 0; font-weight: bold; display: none; align-items: center; justify-content: center; width: 100%; height: 100%; }
     .exam-table { width: 100%; border-collapse: collapse; margin-top: 20px; z-index: 1; position: relative; }
-    .exam-table th, .exam-table td { border: 2px solid #000; padding: 15px; font-size: 16px; font-weight: bold; vertical-align: top; }
+    .exam-table th, .exam-table td { border: 2px solid currentColor; padding: 15px; font-weight: bold; vertical-align: top; }
     
     .size-A4 { width: 210mm; min-height: 297mm; }
     .size-A5 { width: 148mm; min-height: 210mm; font-size: 90%; }
@@ -48,13 +52,14 @@
       #paper-preview { display: flex !important; position: absolute; left: 0; top: 0; margin: 0 !important; transform-origin: top center; border: none; outline: none; }
       .size-A4 { width: 210mm; min-height: 295mm; }
       .size-A5 { width: 148mm; min-height: 208mm; }
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     }
     
-    .paper-header { border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: flex-start; font-size: 15px; font-weight: bold; line-height: 1.6; z-index: 1; position: relative; direction: rtl; }
+    .paper-header { border-bottom: 2px solid currentColor; padding-bottom: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: flex-start; font-size: 1em; font-weight: bold; line-height: 1.6; z-index: 1; position: relative; direction: rtl; }
     .header-right { text-align: right; flex: 1; }
     .header-center { text-align: center; flex: 1.5; }
     .header-left { text-align: left; flex: 1; }
-    .exam-type-title { font-size: 22px; text-decoration: underline; margin-bottom: 6px; }
+    .exam-type-title { font-size: 1.3em; text-decoration: underline; margin-bottom: 6px; }
   </style>
 </head>
 <body>
@@ -87,9 +92,101 @@
                 <option value="table">نمط جدول (سؤال وجواب - ابتدائي)</option>
               </select>
             </div>
-            <!-- حقل اختيار الألوان المخفي افتراضياً -->
-            <div class="form-group" id="table-colors-group" style="display: none;">
-              <label>ألوان الجدول (اختياري)</label>
+            <div class="form-group">
+              <label>إظهار حقول الجواب بالمحرر</label>
+              <select id="showAnswersMode" onchange="toggleAnswerFields()">
+                <option value="auto">في نمط الجدول فقط (الافتراضي)</option>
+                <option value="always">دائماً (لعمل نموذج أجوبة)</option>
+              </select>
+            </div>
+            
+            <!-- قسم العلامة المائية الجديد (نص أو صورة) -->
+            <div class="form-group" style="grid-column: 1 / -1; background: #fff3e0; padding: 12px; border-radius: 6px; border: 1px dashed #ffb74d;">
+              <label style="color: #d84315;">شعار أو علامة مائية (في منتصف الورقة)</label>
+              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <select id="watermarkType" style="flex: 1; min-width: 120px;" onchange="toggleWatermarkInput()">
+                  <option value="text">نص (كتابة اسمك)</option>
+                  <option value="image">صورة (رفع شعار)</option>
+                </select>
+                <input type="text" id="watermarkText" placeholder="اكتب اسمك هنا..." style="flex: 2; min-width: 200px;">
+                <input type="file" id="watermarkImage" accept="image/*" style="flex: 2; min-width: 200px; display: none; padding: 5px; background: #fff;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="border: 2px solid #1976d2;">
+          <h3>🎨 تنسيق الورقة والألوان والفخامة</h3>
+          <div class="grid">
+            <div class="form-group">
+              <label>حجم الخط العام</label>
+              <select id="fontSize">
+                <option value="14px">صغير (14px)</option>
+                <option value="16px" selected>متوسط (16px)</option>
+                <option value="18px">كبير (18px)</option>
+                <option value="20px">كبير جداً (20px)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>شكل الفاصل بين الأسئلة</label>
+              <select id="dividerStyle">
+                <option value="dashed" selected>خط متقطع</option>
+                <option value="solid">خط متصل</option>
+                <option value="dotted">نقاط</option>
+                <option value="stars">نجوم (⭐ ⭐ ⭐)</option>
+                <option value="floral">زخرفة (🌺 🌺 🌺)</option>
+                <option value="none">بدون فاصل</option>
+              </select>
+            </div>
+            
+            <div class="form-group" style="grid-column: 1 / -1; background: #f0f4f8; padding: 10px; border-radius: 6px; border: 1px dashed #ccc;">
+              <label>إطار الورقة (النوع، السُمك، اللون)</label>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <select id="borderStyle" style="flex: 2; min-width: 120px;">
+                  <option value="solid" selected>متصل عادي</option>
+                  <option value="double">مزدوج (خطين)</option>
+                  <option value="dashed">متقطع</option>
+                  <option value="groove">مخدد (3D للداخل)</option>
+                  <option value="ridge">بارز (3D للخارج)</option>
+                  <option value="inset">مغور (Inset)</option>
+                  <option value="outset">نافر (Outset)</option>
+                  <option value="rounded">متصل بحواف دائرية</option>
+                  <option value="none">بدون إطار</option>
+                </select>
+                <select id="borderWidth" style="flex: 1; min-width: 70px;">
+                  <option value="1px">1px</option>
+                  <option value="2px">2px</option>
+                  <option value="3px" selected>3px</option>
+                  <option value="5px">5px</option>
+                  <option value="8px">8px</option>
+                </select>
+                <input type="color" id="borderColor" value="#000000" style="flex: 1; min-width: 50px; padding: 0; height: 38px; cursor: pointer; border: none; border-radius: 4px;">
+              </div>
+            </div>
+
+            <div class="form-group" style="grid-column: 1 / -1; display: flex; gap: 10px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 120px;">
+                  <label>لون النصوص</label>
+                  <input type="color" id="textColor" value="#000000" style="padding: 0; height: 38px; cursor: pointer; border: none; border-radius: 4px; width: 100%;">
+                </div>
+                <div style="flex: 1; min-width: 120px;">
+                  <label>لون الخلفية</label>
+                  <input type="color" id="bgColor" value="#ffffff" style="padding: 0; height: 38px; cursor: pointer; border: none; border-radius: 4px; width: 100%;">
+                </div>
+                <div style="flex: 2; min-width: 200px;">
+                  <label>نقش الخلفية (أشكال فخمة)</label>
+                  <select id="bgPattern" style="height: 38px; padding: 0 10px; font-weight: bold;">
+                    <option value="none" selected>بدون نقش (لون سادة)</option>
+                    <option value="islamic1">زخرفة إسلامية (هندسية فخمة)</option>
+                    <option value="andalusi">زخرفة أندلسية (معينات متداخلة)</option>
+                    <option value="diagonal">خطوط مائلة (رسمية كلاسيكية)</option>
+                    <option value="radial">تدرج إضاءة دائري (Spotlight)</option>
+                  </select>
+                </div>
+            </div>
+
+            <div class="form-group" id="table-colors-group" style="display: none; grid-column: 1 / -1;">
+              <label>ألوان الجدول (فقط لنمط الجدول)</label>
               <div style="display: flex; gap: 10px;">
                 <div style="flex: 1;">
                   <span style="font-size: 11px; display: block; margin-bottom: 2px; color: #666;">عمود السؤال</span>
@@ -100,10 +197,6 @@
                   <input type="color" id="aColor" value="#ffffff" style="padding: 0; height: 38px; cursor: pointer; border: none; border-radius: 4px; width: 100%;">
                 </div>
               </div>
-            </div>
-            <div class="form-group">
-              <label>العلامة المائية (اختياري)</label>
-              <input type="text" id="watermarkText" placeholder="اكتب اسمك لحفظ الحقوق">
             </div>
           </div>
         </div>
@@ -120,8 +213,7 @@
             <div class="form-group"><label>العام الدراسي</label><input type="text" id="year" placeholder="2026/2027"></div>
             <div class="form-group"><label>التاريخ</label><input type="text" id="examDate" placeholder="2026/11/1"></div>
             <div class="form-group"><label>الوقت</label><input type="text" id="examTime" placeholder="ساعة ونصف"></div>
-            <div class="form-group">
-              <label>اللقب (أسفل الورقة)</label>
+            <div class="form-group"><label>اللقب (أسفل الورقة)</label>
               <select id="teacherTitle">
                 <option value="معلم المادة">معلم المادة</option>
                 <option value="معلمة المادة">معلمة المادة</option>
@@ -130,7 +222,7 @@
               </select>
             </div>
             <div class="form-group"><label>اسم الأستاذ</label><input type="text" id="teacherName" placeholder="الاسم والتوقيع"></div>
-            <div class="form-group"><label>الملاحظة السفلية</label><input type="text" id="examNote" placeholder="تمنياتنا لكم بالنجاح"></div>
+            <div class="form-group"><label>الملاحظة السفلية (التمنيات)</label><input type="text" id="examNote" placeholder="تمنياتنا لكم بالنجاح"></div>
           </div>
         </div>
         
@@ -148,16 +240,30 @@
           <button class="btn btn-primary" onclick="addQ()">➕ إضافة سؤال جديد</button>
         </div>
         
-        <div class="actions-bar">
-          <button class="btn btn-success" style="flex:1; font-size: 16px;" onclick="printPaper()">🖨 معاينة وطباعة PDF</button>
-          <button class="btn btn-warning" style="flex:1; font-size: 16px;" onclick="saveImage()">🖼 حفظ كصورة</button>
+        <div class="card" style="border: 2px solid #2e7d32; background: #f4fdf7;">
+          <h3 style="color: #2e7d32;">📥 استخراج وحفظ الورقة</h3>
+          <div style="margin-bottom: 15px; border-bottom: 1px solid #ccc; padding-bottom: 15px;">
+            <strong>📄 نسخة الطلاب (فارغة بدون أجوبة):</strong>
+            <div class="actions-bar">
+              <button class="btn btn-success" style="flex:1;" onclick="printPaper(false)">🖨 طباعة / حفظ كـ PDF</button>
+              <button class="btn btn-warning" style="flex:1;" onclick="saveImage(false)">🖼 حفظ كصورة (Image)</button>
+            </div>
+          </div>
+          <div>
+            <strong>📝 نسخة الأستاذ (الجواب النموذجي):</strong>
+            <div class="actions-bar">
+              <button class="btn btn-purple" style="flex:1;" onclick="printPaper(true)">🖨 طباعة / حفظ كـ PDF</button>
+              <button class="btn btn-warning" style="flex:1; background: #e67e22;" onclick="saveImage(true)">🖼 حفظ كصورة (Image)</button>
+            </div>
+          </div>
         </div>
     </div>
     
     <div id="paper-preview" class="size-A4">
       <div id="pv-watermark" class="watermark"></div>
-      <div style="position: relative; z-index: 1; display: flex; flex-direction: column; min-height: 100%;">
-          <div id="pv-basmala" style="text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 5px; display: none; direction: rtl;">بسم الله الرحمن الرحيم</div>
+      <div style="position: relative; z-index: 1; display: flex; flex-direction: column; height: 100%; min-height: 100vh;">
+          
+          <div id="pv-basmala" style="text-align: center; font-weight: bold; font-size: 1em; margin-bottom: 5px; display: none; direction: rtl;">بسم الله الرحمن الرحيم</div>
           <div class="paper-header">
             <div class="header-right">
               جمهورية العراق<br>وزارة التربية<br>
@@ -176,18 +282,19 @@
             </div>
           </div>
           
-          <!-- منطقة الأسئلة -->
           <div id="pv-qs" style="flex-grow: 1;"></div>
           
-          <div style="margin-top: 30px; display: flex; justify-content: space-between; align-items: flex-end; font-weight: bold; font-size: 16px; direction: rtl;">
-            <div style="text-align: right; width: 30%;">
+          <div style="margin-top: 30px; padding-top: 10px; display: flex; justify-content: space-between; align-items: flex-end; font-weight: bold; font-size: 1em; direction: rtl; width: 100%;">
+            <div style="width: 25%;"></div>
+            <div style="width: 50%; text-align: center;">
+              <span id="pv-note"></span>
+            </div>
+            <div style="width: 25%; text-align: left;">
               <div id="pv-teacher-title"></div>
               <div id="pv-teacher-name" style="margin-top: 5px;"></div>
             </div>
-            <div style="text-align: left; width: 70%;">
-              <span id="pv-note"></span>
-            </div>
           </div>
+          
       </div>
     </div>
   </div>
@@ -195,6 +302,7 @@
   <script>
     let count = 0;
     let activeInput = null;
+    let uploadedWatermarkImage = null; // متغير لحفظ صورة الشعار
     
     document.addEventListener('focusin', function(e) {
       if(e.target.tagName === 'TEXTAREA' || (e.target.tagName === 'INPUT' && e.target.type === 'text')) {
@@ -202,26 +310,49 @@
       }
     });
 
+    // دالة تبديل نوع العلامة المائية
+    function toggleWatermarkInput() {
+        let type = document.getElementById('watermarkType').value;
+        if(type === 'text') {
+            document.getElementById('watermarkText').style.display = 'block';
+            document.getElementById('watermarkImage').style.display = 'none';
+        } else {
+            document.getElementById('watermarkText').style.display = 'none';
+            document.getElementById('watermarkImage').style.display = 'block';
+        }
+    }
+
+    // دالة قراءة الصورة المرفوعة
+    document.getElementById('watermarkImage').addEventListener('change', function(e) {
+        let file = e.target.files[0];
+        if(file) {
+            let reader = new FileReader();
+            reader.onload = function(event) {
+                uploadedWatermarkImage = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
     function toggleMathToolbar() {
       let type = document.getElementById('subjectType').value;
       document.getElementById('math-toolbar').style.display = (type === 'math') ? 'block' : 'none';
-      
       let mathBtns = document.querySelectorAll('.math-btn');
-      mathBtns.forEach(btn => {
-        btn.style.display = (type === 'math') ? 'inline-block' : 'none';
-      });
+      mathBtns.forEach(btn => { btn.style.display = (type === 'math') ? 'inline-block' : 'none'; });
     }
 
     function toggleAnswerFields() {
       let mode = document.getElementById('paperMode').value;
-      let ansFields = document.querySelectorAll('.q-answer');
+      let showMode = document.getElementById('showAnswersMode').value;
       
-      // إظهار وإخفاء حقول الإجابة داخل الأسئلة
+      let ansFields = document.querySelectorAll('.q-answer, .b-answer');
       ansFields.forEach(field => {
-        field.style.display = (mode === 'table') ? 'block' : 'none';
+        if(showMode === 'always' || mode === 'table') {
+            field.style.display = 'block';
+        } else {
+            field.style.display = 'none';
+        }
       });
-      
-      // إظهار وإخفاء خيارات الألوان الخاصة بالجدول
       document.getElementById('table-colors-group').style.display = (mode === 'table') ? 'block' : 'none';
     }
 
@@ -231,14 +362,16 @@
       let mathDisplay = (currentType === 'math') ? 'inline-block' : 'none';
       
       let currentMode = document.getElementById('paperMode').value;
-      let ansDisplay = (currentMode === 'table') ? 'block' : 'none';
+      let showMode = document.getElementById('showAnswersMode').value;
+      let ansDisplay = (showMode === 'always' || currentMode === 'table') ? 'block' : 'none';
       
       let div = document.createElement('div');
       div.className = 'question-block';
-      div.innerHTML = "<div style='display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center;'>" +
-        "<div style='flex:1; display:flex; align-items:center;'>" +
-          "<strong style='margin-left: 10px;'>س" + count + "</strong>" +
-          "<input type='text' class='q-title' placeholder='صيغة السؤال (مثال: أجب عن فرعين)' style='width: 70%; padding: 6px; font-size: 13px; border-color: red; color: red;'>" +
+      div.innerHTML = "<div style='display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; gap: 5px; flex-wrap: wrap;'>" +
+        "<div style='flex:1; display:flex; align-items:center; gap: 5px;'>" +
+          "<strong style='margin-left: 5px;'>س" + count + "</strong>" +
+          "<input type='text' class='q-title' placeholder='صيغة السؤال' style='flex-grow: 1; padding: 6px; font-size: 13px; border-color: red; color: red;'>" +
+          "<input type='text' class='q-marks' placeholder='الدرجة' style='width: 70px; padding: 6px; font-size: 13px;'>" +
         "</div>" +
         "<button type='button' class='btn btn-danger' onclick='this.parentElement.parentElement.remove()'>حذف</button>" +
       "</div>" +
@@ -249,7 +382,7 @@
         "<button type='button' class='toolbar-btn math-btn' style='display: " + mathDisplay + ";' onmousedown='event.preventDefault(); insertSym(this, \" √ \")'>√</button>" +
       "</div>" +
       "<textarea rows='2' class='q-text' placeholder='نص السؤال (يكتب هنا)'></textarea>" +
-      "<textarea rows='2' class='q-answer' placeholder='اكتب الجواب هنا (يظهر في الجدول فقط)' style='display: " + ansDisplay + "; margin-top: 5px; border: 1px solid #2ecc71; background-color: #f4fdf7;'></textarea>" +
+      "<textarea rows='2' class='q-answer' placeholder='اكتب الجواب النموذجي هنا' style='display: " + ansDisplay + "; margin-top: 5px; border: 1px solid #8e44ad; background-color: #f5eef8;'></textarea>" +
       "<div class='branches-container'></div>" +
       "<div style='margin-top: 8px; text-align: right;'>" +
         "<button type='button' class='btn' style='background: #e0e0e0; color: #333; padding: 6px 12px; font-size: 12px; border: 1px solid #ccc;' onclick='addBranch(this)'>" + 
@@ -265,6 +398,10 @@
       let alphabet = ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح', 'ط', 'ي'];
       let currentLetter = alphabet[branchCount] || '-';
       
+      let currentMode = document.getElementById('paperMode').value;
+      let showMode = document.getElementById('showAnswersMode').value;
+      let ansDisplay = (showMode === 'always' || currentMode === 'table') ? 'block' : 'none';
+      
       let branchDiv = document.createElement('div');
       branchDiv.className = 'b-block';
       branchDiv.style.marginTop = '10px';
@@ -273,14 +410,16 @@
       branchDiv.style.borderRadius = '6px';
       branchDiv.style.backgroundColor = '#f0f4f8';
       
-      branchDiv.innerHTML = "<div style='display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center;'>" +
-        "<div style='flex:1; display:flex; align-items:center;'>" +
-          "<strong class='b-label' style='margin-left: 10px;'>فرع (" + currentLetter + ")</strong>" +
-          "<input type='text' class='b-title' placeholder='صيغة الفرع (مثال: علل ما يأتي)' style='width: 70%; padding: 6px; font-size: 13px; border-color: red; color: red;'>" +
+      branchDiv.innerHTML = "<div style='display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; gap: 5px; flex-wrap: wrap;'>" +
+        "<div style='flex:1; display:flex; align-items:center; gap: 5px;'>" +
+          "<strong class='b-label' style='margin-left: 5px;'>فرع (" + currentLetter + ")</strong>" +
+          "<input type='text' class='b-title' placeholder='صيغة الفرع' style='flex-grow: 1; padding: 6px; font-size: 13px; border-color: red; color: red;'>" +
+          "<input type='text' class='b-marks' placeholder='الدرجة' style='width: 70px; padding: 6px; font-size: 13px;'>" +
         "</div>" +
         "<button type='button' class='btn btn-danger' style='padding: 4px 8px; font-size: 12px;' onclick='this.parentElement.parentElement.remove(); updateBranches(this.closest(\".branches-container\"));'>حذف</button>" +
       "</div>" +
-      "<textarea rows='2' class='b-text' placeholder='اكتب نص الفرع هنا...' style='width: 100%; padding: 6px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px;'></textarea>";
+      "<textarea rows='2' class='b-text' placeholder='اكتب نص الفرع هنا...'></textarea>" +
+      "<textarea rows='1' class='b-answer' placeholder='جواب الفرع' style='display: " + ansDisplay + "; width: 100%; padding: 6px; font-size: 13px; border: 1px solid #8e44ad; background-color: #f5eef8; margin-top: 5px; border-radius: 4px;'></textarea>";
       
       container.appendChild(branchDiv);
     }
@@ -310,13 +449,57 @@
       }
     }
     
-    function preparePaper() {
+    function preparePaper(isAnswerKey) {
       let pSize = document.getElementById('paperSize').value;
       let subjectType = document.getElementById('subjectType').value;
       let paperMode = document.getElementById('paperMode').value;
+      let divStyle = document.getElementById('dividerStyle').value;
       let preview = document.getElementById('paper-preview');
       let isEnglish = (subjectType === 'english');
       
+      preview.style.fontSize = document.getElementById('fontSize').value;
+      preview.style.color = document.getElementById('textColor').value;
+      preview.style.backgroundColor = document.getElementById('bgColor').value;
+      
+      // تطبيق النقوش الفخمة (SVG)
+      let pattern = document.getElementById('bgPattern').value;
+      let pColor = document.getElementById('textColor').value.replace('#', '%23');
+      
+      if(pattern === 'islamic1') {
+         preview.style.backgroundImage = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='" + pColor + "' fill-opacity='0.05'%3E%3Cpath d='M0 0h40v40H0V0zm40 40h40v40H40V40zm0-40h2l-2 2h-2l2-2zm0 40h2l-2 2h-2l2-2zM0 40h2l-2 2h-2l2-2zm40-40H20v20h20V0zm0 40H20v20h20V40zm20 20v-20h20v20H60zm-40-40v-20h20v20H20zM0 0v20h20V0H0zm40 40v20h20V40H40z'/%3E%3C/g%3E%3C/svg%3E\")";
+         preview.style.backgroundSize = '80px 80px';
+      } else if(pattern === 'andalusi') {
+         preview.style.backgroundImage = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='" + pColor + "' fill-opacity='0.04'%3E%3Cpath d='M30 60L0 30 30 0l30 30-30 30zm0-10l20-20-20-20-20 20 20 20z'/%3E%3C/g%3E%3C/svg%3E\")";
+         preview.style.backgroundSize = '60px 60px';
+      } else if(pattern === 'diagonal') {
+         preview.style.backgroundImage = 'repeating-linear-gradient(45deg, transparent, transparent 10px, ' + document.getElementById('textColor').value + '08 10px, ' + document.getElementById('textColor').value + '08 11px)';
+         preview.style.backgroundSize = '100% 100%';
+      } else if(pattern === 'radial') {
+         preview.style.backgroundImage = 'radial-gradient(circle at center, ' + document.getElementById('textColor').value + '08 0%, transparent 70%)';
+         preview.style.backgroundSize = '100% 100%';
+      } else {
+         preview.style.backgroundImage = 'none';
+      }
+      
+      let bStyle = document.getElementById('borderStyle').value;
+      let bWidth = document.getElementById('borderWidth').value;
+      let bColor = document.getElementById('borderColor').value;
+      
+      if(bStyle === 'none') {
+          preview.style.border = 'none';
+          preview.style.outline = 'none';
+          preview.style.borderRadius = '0';
+      } else if(bStyle === 'rounded') {
+          preview.style.border = bWidth + ' solid ' + bColor;
+          preview.style.outline = 'none';
+          preview.style.borderRadius = '20px';
+      } else {
+          preview.style.border = bWidth + ' ' + bStyle + ' ' + bColor;
+          preview.style.outline = '1px solid ' + bColor;
+          preview.style.outlineOffset = '-8px';
+          preview.style.borderRadius = '0';
+      }
+
       preview.className = 'size-' + pSize;
       
       let qsContainer = document.getElementById('pv-qs');
@@ -335,13 +518,34 @@
           document.getElementById('pv-dir-br').style.display = 'none';
       }
 
-      let watermarkText = document.getElementById('watermarkText').value;
+      // تطبيق العلامة المائية الذكية (نص أو صورة)
       let watermarkElem = document.getElementById('pv-watermark');
-      if(watermarkText) { watermarkElem.style.display = 'block'; watermarkElem.innerText = watermarkText; } 
-      else { watermarkElem.style.display = 'none'; }
+      let wmType = document.getElementById('watermarkType').value;
+      
+      if(wmType === 'text') {
+          let wmText = document.getElementById('watermarkText').value;
+          if(wmText) {
+              watermarkElem.style.display = 'flex';
+              watermarkElem.innerHTML = wmText;
+              watermarkElem.style.transform = 'translate(-50%, -50%) rotate(-45deg)';
+          } else {
+              watermarkElem.style.display = 'none';
+          }
+      } else {
+          if(uploadedWatermarkImage) {
+              watermarkElem.style.display = 'flex';
+              watermarkElem.innerHTML = "<img src='" + uploadedWatermarkImage + "' style='max-width: 60%; max-height: 60%; opacity: 0.15; object-fit: contain;'>";
+              watermarkElem.style.transform = 'translate(-50%, -50%)'; // إبقاء الشعار مستقيم
+          } else {
+              watermarkElem.style.display = 'none';
+          }
+      }
 
       document.getElementById('pv-school').innerText = document.getElementById('school').value;
-      document.getElementById('pv-type').innerText = document.getElementById('examType').value;
+      
+      let examTypeBase = document.getElementById('examType').value;
+      document.getElementById('pv-type').innerText = examTypeBase + (isAnswerKey ? " - (الجواب النموذجي)" : "");
+      
       document.getElementById('pv-subject').innerText = document.getElementById('subject').value;
       document.getElementById('pv-grade').innerText = document.getElementById('grade').value;
       document.getElementById('pv-year').innerText = document.getElementById('year').value;
@@ -355,30 +559,31 @@
       pq.innerHTML = "";
       
       let blocks = document.querySelectorAll('.question-block');
-      let validBlocks = Array.from(blocks).filter(b => b.querySelector('.q-text').value.trim() !== "" || b.querySelector('.q-title').value.trim() !== "" || (b.querySelector('.q-answer') && b.querySelector('.q-answer').value.trim() !== "") || b.querySelectorAll('.b-block').length > 0);
+      let validBlocks = Array.from(blocks).filter(b => b.querySelector('.q-text').value.trim() !== "" || b.querySelector('.q-title').value.trim() !== "" || b.querySelectorAll('.b-block').length > 0);
       
       let alphabet = isEnglish ? ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] : ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح', 'ط', 'ي'];
       let padSide = isEnglish ? "padding-left" : "padding-right";
+      let floatSide = isEnglish ? "right" : "left";
 
       if(paperMode === 'table') {
-         // قراءة الألوان التي اختارها المستخدم
          let qColor = document.getElementById('qColor').value;
          let aColor = document.getElementById('aColor').value;
-
          let thQ = isEnglish ? "Question" : "السؤال";
          let thA = isEnglish ? "Answer" : "الجواب";
          
-         // تطبيق الألوان على العناوين
          let tableHTML = "<table class='exam-table'><tr><th style='width: 50%; text-align: center; background-color: " + qColor + ";'>" + thQ + "</th><th style='width: 50%; text-align: center; background-color: " + aColor + ";'>" + thA + "</th></tr>";
          
          validBlocks.forEach((b, i) => {
             let qTitle = b.querySelector('.q-title').value.trim();
             let qText = b.querySelector('.q-text').value.replace(/\n/g, '<br>');
-            let qAnswer = b.querySelector('.q-answer') ? b.querySelector('.q-answer').value.replace(/\n/g, '<br>') : "";
+            let qAnswerVal = b.querySelector('.q-answer') ? b.querySelector('.q-answer').value.replace(/\n/g, '<br>') : "";
+            let qMarks = b.querySelector('.q-marks') ? b.querySelector('.q-marks').value.trim() : "";
             let qLabel = isEnglish ? "Q" + (i+1) + ". " : "س" + (i+1) + ": ";
+            let qMarksHtml = qMarks ? " <span style='color: inherit; font-size: 0.9em; opacity: 0.8; white-space: nowrap;'>(" + qMarks + ")</span>" : "";
             
-            // تطبيق الألوان على الحقول الداخلية
-            tableHTML += "<tr><td style='background-color: " + qColor + ";'><strong>" + qLabel + "</strong>" + (qTitle ? "<span style='color:red; margin: 0 5px;'>"+qTitle+"</span><br>" : "") + qText + "</td><td style='background-color: " + aColor + ";'>" + qAnswer + "</td></tr>";
+            let finalTableAnswer = isAnswerKey ? qAnswerVal : "";
+            
+            tableHTML += "<tr><td style='background-color: " + qColor + ";'><strong>" + qLabel + "</strong>" + (qTitle ? "<span style='color:inherit; opacity: 0.9; margin: 0 5px;'>"+qTitle+"</span><br>" : "") + qText + qMarksHtml + "</td><td style='background-color: " + aColor + ";'>" + finalTableAnswer + "</td></tr>";
          });
          tableHTML += "</table>";
          pq.innerHTML = tableHTML;
@@ -386,12 +591,27 @@
           validBlocks.forEach((b, i) => {
             let qTitle = b.querySelector('.q-title').value.trim();
             let qText = b.querySelector('.q-text').value.replace(/\n/g, '<br>');
+            let qMarks = b.querySelector('.q-marks') ? b.querySelector('.q-marks').value.trim() : "";
+            let qAnswerVal = b.querySelector('.q-answer') ? b.querySelector('.q-answer').value.replace(/\n/g, '<br>') : "";
+            
             let qNum = (i+1).toString();
             let qLabel = isEnglish ? "Q" + qNum + ". " : "س" + qNum + ": ";
             
-            let borderStyle = (i === validBlocks.length - 1) ? "border-bottom: none;" : "border-bottom: 2px dashed #666;";
-            let titleHtml = qTitle ? "<span style='color: red; margin: 0 8px; font-size: 16px;'>" + qTitle + "</span>" : "";
-            let mainTextHtml = qText ? "<div style='font-size: 16px; line-height: 1.5; " + padSide + ": 15px; margin-top: 4px;'>" + qText + "</div>" : "";
+            let borderStyle = "";
+            let customDivider = "";
+            if (i < validBlocks.length - 1) {
+                if(divStyle === 'dashed') borderStyle = "border-bottom: 2px dashed currentColor;";
+                else if(divStyle === 'solid') borderStyle = "border-bottom: 2px solid currentColor;";
+                else if(divStyle === 'dotted') borderStyle = "border-bottom: 2px dotted currentColor;";
+                else if(divStyle === 'stars') customDivider = "<div style='text-align:center; letter-spacing: 15px; margin-top: 15px; font-size: 1.2em;'>⭐ ⭐ ⭐</div>";
+                else if(divStyle === 'floral') customDivider = "<div style='text-align:center; letter-spacing: 15px; margin-top: 15px; font-size: 1.2em;'>🌺 🌺 🌺</div>";
+            }
+            
+            let titleHtml = qTitle ? "<span style='color: inherit; opacity: 0.9; margin: 0 8px; font-size: 1em;'>" + qTitle + "</span>" : "";
+            let mainTextHtml = qText ? "<div style='font-size: 1em; line-height: 1.5; " + padSide + ": 15px; margin-top: 4px;'>" + qText + "</div>" : "";
+            let qMarksHtml = qMarks ? "<span style='float: " + floatSide + "; font-size: 0.95em; font-weight: bold; margin: 0 10px;'>(" + qMarks + ")</span>" : "";
+            
+            let mainAnswerHtml = (isAnswerKey && qAnswerVal) ? "<div style='margin: 8px 15px 0 15px; color: #8e44ad; font-weight: bold; padding: 5px; border-radius: 4px; border: 1px dashed #8e44ad; background: rgba(142,68,173,0.05);'>الجواب: " + qAnswerVal + "</div>" : "";
             
             let branchesHtml = "";
             let bBlocks = b.querySelectorAll('.b-block');
@@ -400,36 +620,42 @@
             bBlocks.forEach(bb => {
               let bTitleVal = bb.querySelector('.b-title').value.trim();
               let bTextVal = bb.querySelector('.b-text').value.replace(/\n/g, '<br>');
+              let bMarksVal = bb.querySelector('.b-marks') ? bb.querySelector('.b-marks').value.trim() : "";
+              let bAnswerVal = bb.querySelector('.b-answer') ? bb.querySelector('.b-answer').value.replace(/\n/g, '<br>') : "";
               
               if(bTitleVal !== "" || bTextVal.trim() !== "") {
-                let bTitleHtml = bTitleVal ? "<span style='color: red; margin: 0 8px; font-size: 16px;'>" + bTitleVal + "</span>" : "";
+                let bTitleHtml = bTitleVal ? "<span style='color: inherit; opacity: 0.9; margin: 0 8px; font-size: 1em;'>" + bTitleVal + "</span>" : "";
                 let branchLabel = isEnglish ? alphabet[bIndex] + ") " : alphabet[bIndex] + " / ";
+                let bMarksHtml = bMarksVal ? "<span style='float: " + floatSide + "; font-size: 0.9em; font-weight: bold; margin: 0 10px;'>(" + bMarksVal + ")</span>" : "";
                 
-                branchesHtml += "<div style='margin-top: 12px; " + padSide + ": 20px; font-size: 16px;'>" +
-                  "<div style='margin-bottom: 4px;'><strong>" + branchLabel + "</strong>" + bTitleHtml + "</div>" +
+                let bAnswerHtml = (isAnswerKey && bAnswerVal) ? "<div style='margin: 5px 25px 0 25px; color: #8e44ad; font-weight: bold; padding: 4px; border: 1px dashed #8e44ad; background: rgba(142,68,173,0.05);'>الجواب: " + bAnswerVal + "</div>" : "";
+                
+                branchesHtml += "<div style='margin-top: 12px; " + padSide + ": 20px; font-size: 1em; overflow: hidden;'>" +
+                  "<div style='margin-bottom: 4px;'>" + bMarksHtml + "<strong>" + branchLabel + "</strong>" + bTitleHtml + "</div>" +
                   "<div style='" + padSide + ": 25px; line-height: 1.5;'>" + bTextVal + "</div>" +
+                  bAnswerHtml +
                 "</div>";
                 bIndex++;
               }
             });
             
             pq.innerHTML += "<div style='margin-bottom: 15px; padding-bottom: 15px; " + borderStyle + "'>" +
-              "<div style='margin-bottom: 8px;'><strong style='font-size: 18px;'>" + qLabel + "</strong> " + titleHtml + "</div>" +
-              mainTextHtml + branchesHtml +
+              "<div style='margin-bottom: 8px; overflow: hidden;'>" + qMarksHtml + "<strong style='font-size: 1.1em;'>" + qLabel + "</strong> " + titleHtml + "</div>" +
+              mainTextHtml + mainAnswerHtml + branchesHtml + customDivider +
             "</div>";
           });
       }
     }
 
-    function printPaper() {
-      preparePaper();
+    function printPaper(isAnswerKey) {
+      preparePaper(isAnswerKey);
       document.getElementById('paper-preview').style.display = 'flex';
       window.print();
       document.getElementById('paper-preview').style.display = 'none';
     }
     
-    function saveImage() {
-      preparePaper();
+    function saveImage(isAnswerKey) {
+      preparePaper(isAnswerKey);
       let editor = document.getElementById('editor-ui');
       let preview = document.getElementById('paper-preview');
       
@@ -437,9 +663,9 @@
       preview.style.display = 'flex';
       
       setTimeout(() => {
-        html2canvas(preview, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+        html2canvas(preview, { scale: 2, backgroundColor: document.getElementById('bgColor').value }).then(canvas => {
           let link = document.createElement('a');
-          link.download = 'الأسئلة_الامتحانية.png';
+          link.download = isAnswerKey ? 'الجواب_النموذجي.png' : 'الأسئلة_الامتحانية.png';
           link.href = canvas.toDataURL('image/png');
           link.click();
           
@@ -450,6 +676,16 @@
     }
 
     addQ();
+    
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('sw.js').then(function(registration) {
+          console.log('تم تفعيل ميزة الأوفلاين بنجاح!');
+        }, function(err) {
+          console.log('فشل تفعيل الأوفلاين: ', err);
+        });
+      });
+    }
   </script>
 </body>
 </html>
