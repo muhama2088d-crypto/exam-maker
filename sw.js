@@ -1,4 +1,4 @@
-const CACHE_NAME = 'exam-maker-v4';
+const CACHE_NAME = 'exam-maker-v5';
 const urlsToCache = [
   './',
   './index.html',
