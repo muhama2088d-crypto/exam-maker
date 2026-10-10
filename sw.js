@@ -1,4 +1,4 @@
-const CACHE_NAME = 'exam-maker-v3';
+const CACHE_NAME = 'exam-maker-v4';
 const urlsToCache = [
   './',
   './index.html',
@@ -6,11 +6,26 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', event => {
+  self.skipWaiting(); // هذا السطر السحري يجبر التطبيق على التحديث فوراً
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
         return cache.addAll(urlsToCache);
       })
+  );
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName); // مسح النسخ القديمة من جهاز المستخدم
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
   );
 });
 
