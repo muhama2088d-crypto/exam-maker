@@ -28,22 +28,12 @@
     .btn-purple { background: #8e44ad; color: #fff; }
     .toolbar-btn { background: #eee; border: 1px solid #ccc; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer; margin-left: 4px; margin-bottom: 4px; }
     .actions-bar { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-    
-    #paper-preview { 
-      display: none; background-color: #fff; color: #000;
-      border: 3px solid currentColor; outline: 1px solid currentColor; outline-offset: -8px;
-      padding: 30px; margin: 20px auto; direction: rtl; text-align: right; 
-      flex-direction: column; position: relative; overflow: hidden;
-      font-size: 16px; background-size: auto; background-repeat: repeat; background-position: center;
-    }
-    
+    #paper-preview { display: none; background-color: #fff; color: #000; border: 3px solid currentColor; outline: 1px solid currentColor; outline-offset: -8px; padding: 30px; margin: 20px auto; direction: rtl; text-align: right; flex-direction: column; position: relative; overflow: hidden; font-size: 16px; background-size: auto; background-repeat: repeat; background-position: center; }
     .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 80px; color: rgba(0,0,0,0.06); white-space: nowrap; pointer-events: none; z-index: 0; font-weight: bold; display: none; align-items: center; justify-content: center; width: 100%; height: 100%; }
     .exam-table { width: 100%; border-collapse: collapse; margin-top: 20px; z-index: 1; position: relative; }
     .exam-table th, .exam-table td { border: 2px solid currentColor; padding: 15px; font-weight: bold; vertical-align: top; }
-    
     .size-A4 { width: 210mm; min-height: 297mm; }
     .size-A5 { width: 148mm; min-height: 210mm; font-size: 90%; }
-    
     @media print {
       @page { margin: 0; } 
       body { background-color: #fff; padding: 0; margin: 0; display: flex; justify-content: center; }
@@ -55,7 +45,6 @@
       .size-A5 { width: 148mm; min-height: 208mm; }
       * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     }
-    
     .paper-header { border-bottom: 2px solid currentColor; padding-bottom: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: flex-start; font-size: 1em; font-weight: bold; line-height: 1.6; z-index: 1; position: relative; direction: rtl; }
     .header-right { text-align: right; flex: 1; }
     .header-center { text-align: center; flex: 1.5; }
@@ -67,50 +56,21 @@
   <div class="container">
     <div id="editor-ui">
         <h2 style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-          📝 صانع الأسئلة الامتحانية
+          <div>📝 صانع الأسئلة الامتحانية <br><span style="font-size: 13px; color: #666; font-weight: normal;">تطوير: محمد باقر - قناة تبسيط التقنية</span></div>
           <button id="installBtn" class="btn" style="background: #e74c3c; color: white; display: none; padding: 8px 12px; font-size: 14px; border-radius: 8px; box-shadow: 0 4px 6px rgba(231,76,60,0.3);">📱 تثبيت كتطبيق</button>
         </h2>
         
         <div class="card">
           <h3>إعدادات الورقة والمادة</h3>
           <div class="grid">
-            <div class="form-group">
-              <label>حجم الورقة</label>
-              <select id="paperSize">
-                <option value="A4">A4 - ورقة كاملة</option>
-                <option value="A5">A5 - نصف ورقة</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>تخصيص المادة</label>
-              <select id="subjectType" onchange="toggleMathToolbar()">
-                <option value="arabic">عربي ومواد عامة</option>
-                <option value="english">اللغة الإنكليزية (من اليسار لليمين)</option>
-                <option value="math">الرياضيات (إظهار الرموز)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>نمط الأسئلة</label>
-              <select id="paperMode" onchange="toggleAnswerFields()">
-                <option value="standard">نمط اعتيادي</option>
-                <option value="table">نمط جدول (سؤال وجواب - ابتدائي)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>إظهار حقول الجواب بالمحرر</label>
-              <select id="showAnswersMode" onchange="toggleAnswerFields()">
-                <option value="auto">في نمط الجدول فقط (الافتراضي)</option>
-                <option value="always">دائماً (لعمل نموذج أجوبة)</option>
-              </select>
-            </div>
-            
+            <div class="form-group"><label>حجم الورقة</label><select id="paperSize"><option value="A4">A4 - ورقة كاملة</option><option value="A5">A5 - نصف ورقة</option></select></div>
+            <div class="form-group"><label>تخصيص المادة</label><select id="subjectType" onchange="toggleMathToolbar()"><option value="arabic">عربي ومواد عامة</option><option value="english">اللغة الإنكليزية (من اليسار لليمين)</option><option value="math">الرياضيات (إظهار الرموز)</option></select></div>
+            <div class="form-group"><label>نمط الأسئلة</label><select id="paperMode" onchange="toggleAnswerFields()"><option value="standard">نمط اعتيادي (أسئلة فقط)</option><option value="model_answer">أسئلة مع أجوبة نموذجية</option><option value="table">نمط جدول (سؤال وجواب - ابتدائي)</option></select></div>
+            <div class="form-group"><label>نوع الأرقام</label><select id="numberFormat"><option value="arabic">أرقام إنجليزية (12345) - للمتوسطة/الإعدادية</option><option value="hindi">أرقام عربية (١٢٣٤٥) - للابتدائية</option></select></div>
             <div class="form-group" style="grid-column: 1 / -1; background: #fff3e0; padding: 12px; border-radius: 6px; border: 1px dashed #ffb74d;">
               <label style="color: #d84315;">شعار أو علامة مائية (في منتصف الورقة)</label>
               <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <select id="watermarkType" style="flex: 1; min-width: 120px;" onchange="toggleWatermarkInput()">
-                  <option value="text">نص (كتابة اسمك)</option>
-                  <option value="image">صورة (رفع شعار)</option>
-                </select>
+                <select id="watermarkType" style="flex: 1; min-width: 120px;" onchange="toggleWatermarkInput()"><option value="text">نص (كتابة اسمك)</option><option value="image">صورة (رفع شعار)</option></select>
                 <input type="text" id="watermarkText" placeholder="اكتب اسمك هنا..." style="flex: 2; min-width: 200px;">
                 <input type="file" id="watermarkImage" accept="image/*" style="flex: 2; min-width: 200px; display: none; padding: 5px; background: #fff;">
               </div>
@@ -121,84 +81,29 @@
         <div class="card" style="border: 2px solid #1976d2;">
           <h3>🎨 تنسيق الورقة والألوان والفخامة</h3>
           <div class="grid">
-            <div class="form-group">
-              <label>حجم الخط العام</label>
-              <select id="fontSize">
-                <option value="14px">صغير (14px)</option>
-                <option value="16px" selected>متوسط (16px)</option>
-                <option value="18px">كبير (18px)</option>
-                <option value="20px">كبير جداً (20px)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>شكل الفاصل بين الأسئلة</label>
-              <select id="dividerStyle">
-                <option value="dashed" selected>خط متقطع</option>
-                <option value="solid">خط متصل</option>
-                <option value="dotted">نقاط</option>
-                <option value="stars">نجوم (⭐ ⭐ ⭐)</option>
-                <option value="floral">زخرفة (🌺 🌺 🌺)</option>
-                <option value="none">بدون فاصل</option>
-              </select>
-            </div>
+            <div class="form-group"><label>حجم الخط العام</label><select id="fontSize"><option value="14px">صغير (14px)</option><option value="16px" selected>متوسط (16px)</option><option value="18px">كبير (18px)</option><option value="20px">كبير جداً (20px)</option></select></div>
+            <div class="form-group"><label>شكل الفاصل بين الأسئلة</label><select id="dividerStyle"><option value="dashed" selected>خط متقطع</option><option value="solid">خط متصل</option><option value="dotted">نقاط</option><option value="stars">نجوم (⭐ ⭐ ⭐)</option><option value="floral">زخرفة (🌺 🌺 🌺)</option><option value="none">بدون فاصل</option></select></div>
             
             <div class="form-group" style="grid-column: 1 / -1; background: #f0f4f8; padding: 10px; border-radius: 6px; border: 1px dashed #ccc;">
               <label>إطار الورقة (النوع، السُمك، اللون)</label>
               <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <select id="borderStyle" style="flex: 2; min-width: 120px;">
-                  <option value="solid" selected>متصل عادي</option>
-                  <option value="double">مزدوج (خطين)</option>
-                  <option value="dashed">متقطع</option>
-                  <option value="groove">مخدد (3D للداخل)</option>
-                  <option value="ridge">بارز (3D للخارج)</option>
-                  <option value="inset">مغور (Inset)</option>
-                  <option value="outset">نافر (Outset)</option>
-                  <option value="rounded">متصل بحواف دائرية</option>
-                  <option value="none">بدون إطار</option>
-                </select>
-                <select id="borderWidth" style="flex: 1; min-width: 70px;">
-                  <option value="1px">1px</option>
-                  <option value="2px">2px</option>
-                  <option value="3px" selected>3px</option>
-                  <option value="5px">5px</option>
-                  <option value="8px">8px</option>
-                </select>
+                <select id="borderStyle" style="flex: 2; min-width: 120px;"><option value="solid" selected>متصل عادي</option><option value="double">مزدوج (خطين)</option><option value="dashed">متقطع</option><option value="groove">مخدد (3D للداخل)</option><option value="ridge">بارز (3D للخارج)</option><option value="inset">مغور (Inset)</option><option value="outset">نافر (Outset)</option><option value="rounded">متصل بحواف دائرية</option><option value="none">بدون إطار</option></select>
+                <select id="borderWidth" style="flex: 1; min-width: 70px;"><option value="1px">1px</option><option value="2px">2px</option><option value="3px" selected>3px</option><option value="5px">5px</option><option value="8px">8px</option></select>
                 <input type="color" id="borderColor" value="#000000" style="flex: 1; min-width: 50px; padding: 0; height: 38px; cursor: pointer; border: none; border-radius: 4px;">
               </div>
             </div>
 
             <div class="form-group" style="grid-column: 1 / -1; display: flex; gap: 10px; flex-wrap: wrap;">
-                <div style="flex: 1; min-width: 120px;">
-                  <label>لون النصوص</label>
-                  <input type="color" id="textColor" value="#000000" style="padding: 0; height: 38px; cursor: pointer; border: none; border-radius: 4px; width: 100%;">
-                </div>
-                <div style="flex: 1; min-width: 120px;">
-                  <label>لون الخلفية</label>
-                  <input type="color" id="bgColor" value="#ffffff" style="padding: 0; height: 38px; cursor: pointer; border: none; border-radius: 4px; width: 100%;">
-                </div>
-                <div style="flex: 2; min-width: 200px;">
-                  <label>نقش الخلفية (أشكال فخمة)</label>
-                  <select id="bgPattern" style="height: 38px; padding: 0 10px; font-weight: bold;">
-                    <option value="none" selected>بدون نقش (لون سادة)</option>
-                    <option value="islamic1">زخرفة إسلامية (هندسية فخمة)</option>
-                    <option value="andalusi">زخرفة أندلسية (معينات متداخلة)</option>
-                    <option value="diagonal">خطوط مائلة (رسمية كلاسيكية)</option>
-                    <option value="radial">تدرج إضاءة دائري (Spotlight)</option>
-                  </select>
-                </div>
+                <div style="flex: 1; min-width: 120px;"><label>لون النصوص</label><input type="color" id="textColor" value="#000000" style="padding: 0; height: 38px; cursor: pointer; border: none; border-radius: 4px; width: 100%;"></div>
+                <div style="flex: 1; min-width: 120px;"><label>لون الخلفية</label><input type="color" id="bgColor" value="#ffffff" style="padding: 0; height: 38px; cursor: pointer; border: none; border-radius: 4px; width: 100%;"></div>
+                <div style="flex: 2; min-width: 200px;"><label>نقش الخلفية (أشكال فخمة)</label><select id="bgPattern" style="height: 38px; padding: 0 10px; font-weight: bold;"><option value="none" selected>بدون نقش (لون سادة)</option><option value="islamic1">زخرفة إسلامية (هندسية فخمة)</option><option value="andalusi">زخرفة أندلسية (معينات متداخلة)</option><option value="diagonal">خطوط مائلة (رسمية كلاسيكية)</option><option value="radial">تدرج إضاءة دائري (Spotlight)</option></select></div>
             </div>
 
             <div class="form-group" id="table-colors-group" style="display: none; grid-column: 1 / -1;">
               <label>ألوان الجدول (فقط لنمط الجدول)</label>
               <div style="display: flex; gap: 10px;">
-                <div style="flex: 1;">
-                  <span style="font-size: 11px; display: block; margin-bottom: 2px; color: #666;">عمود السؤال</span>
-                  <input type="color" id="qColor" value="#ffffff" style="padding: 0; height: 38px; cursor: pointer; border: none; border-radius: 4px; width: 100%;">
-                </div>
-                <div style="flex: 1;">
-                  <span style="font-size: 11px; display: block; margin-bottom: 2px; color: #666;">عمود الجواب</span>
-                  <input type="color" id="aColor" value="#ffffff" style="padding: 0; height: 38px; cursor: pointer; border: none; border-radius: 4px; width: 100%;">
-                </div>
+                <div style="flex: 1;"><span style="font-size: 11px; display: block; margin-bottom: 2px; color: #666;">عمود السؤال</span><input type="color" id="qColor" value="#ffffff" style="padding: 0; height: 38px; cursor: pointer; border: none; border-radius: 4px; width: 100%;"></div>
+                <div style="flex: 1;"><span style="font-size: 11px; display: block; margin-bottom: 2px; color: #666;">عمود الجواب</span><input type="color" id="aColor" value="#ffffff" style="padding: 0; height: 38px; cursor: pointer; border: none; border-radius: 4px; width: 100%;"></div>
               </div>
             </div>
           </div>
@@ -217,12 +122,7 @@
             <div class="form-group"><label>التاريخ</label><input type="text" id="examDate" placeholder="2026/11/1"></div>
             <div class="form-group"><label>الوقت</label><input type="text" id="examTime" placeholder="ساعة ونصف"></div>
             <div class="form-group"><label>اللقب (أسفل الورقة)</label>
-              <select id="teacherTitle">
-                <option value="معلم المادة">معلم المادة</option>
-                <option value="معلمة المادة">معلمة المادة</option>
-                <option value="مدرس المادة">مدرس المادة</option>
-                <option value="مدرسة المادة">مدرسة المادة</option>
-              </select>
+              <select id="teacherTitle"><option value="معلم المادة">معلم المادة</option><option value="معلمة المادة">معلمة المادة</option><option value="مدرس المادة">مدرس المادة</option><option value="مدرسة المادة">مدرسة المادة</option></select>
             </div>
             <div class="form-group"><label>اسم الأستاذ</label><input type="text" id="teacherName" placeholder="الاسم والتوقيع"></div>
             <div class="form-group"><label>الملاحظة السفلية (التمنيات)</label><input type="text" id="examNote" placeholder="تمنياتنا لكم بالنجاح"></div>
@@ -246,7 +146,7 @@
         <div class="card" style="border: 2px solid #2e7d32; background: #f4fdf7;">
           <h3 style="color: #2e7d32;">📥 استخراج وحفظ الورقة</h3>
           <div style="margin-bottom: 15px; border-bottom: 1px solid #ccc; padding-bottom: 15px;">
-            <strong>📄 نسخة الطلاب (فارغة بدون أجوبة):</strong>
+            <strong>📄 نسخة الطلاب (أسئلة فقط بدون أجوبة):</strong>
             <div class="actions-bar">
               <button class="btn btn-success" style="flex:1;" onclick="printPaper(false)">🖨 طباعة / حفظ كـ PDF</button>
               <button class="btn btn-warning" style="flex:1;" onclick="saveImage(false)">🖼 حفظ كصورة (Image)</button>
@@ -287,15 +187,21 @@
           
           <div id="pv-qs" style="flex-grow: 1;"></div>
           
-          <div style="margin-top: 30px; padding-top: 10px; display: flex; justify-content: space-between; align-items: flex-end; font-weight: bold; font-size: 1em; direction: rtl; width: 100%;">
-            <div style="width: 25%;"></div>
-            <div style="width: 50%; text-align: center;">
-              <span id="pv-note"></span>
-            </div>
-            <div style="width: 25%; text-align: left;">
-              <div id="pv-teacher-title"></div>
-              <div id="pv-teacher-name" style="margin-top: 5px;"></div>
-            </div>
+          <div style="margin-top: auto; padding-top: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-end; font-weight: bold; font-size: 1em; direction: rtl; width: 100%;">
+                <div style="width: 25%;"></div>
+                <div style="width: 50%; text-align: center;">
+                  <span id="pv-note"></span>
+                </div>
+                <div style="width: 25%; text-align: left;">
+                  <div id="pv-teacher-title"></div>
+                  <div id="pv-teacher-name" style="margin-top: 5px;"></div>
+                </div>
+              </div>
+              
+              <div style="text-align: center; font-size: 11px; color: #7f8c8d; margin-top: 25px; border-top: 1px dashed #bdc3c7; padding-top: 5px; direction: rtl; width: 100%; font-weight: normal;">
+                تم الإنشاء بواسطة أداة صانع الأسئلة - تطوير: محمد باقر (قناة تبسيط التقنية)
+              </div>
           </div>
           
       </div>
@@ -303,409 +209,152 @@
   </div>
   
   <script>
-    let count = 0;
-    let activeInput = null;
-    let uploadedWatermarkImage = null;
-    
-    // PWA Install Logic
-    let deferredPrompt;
-    const installBtn = document.getElementById('installBtn');
+    console.log("%c⚠️ توقف!", "color: red; font-size: 40px; font-weight: bold; text-shadow: 1px 1px 0 #000;");
+    console.log("%cهذا الكود محمي ومملوك حصرياً للمطور (محمد باقر - قناة تبسيط التقنية).\nأي محاولة لنسخ أو سرقة الكود تعرضك للمساءلة القانونية.", "color: #1976d2; font-size: 16px; font-weight: bold;");
 
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      installBtn.style.display = 'inline-block';
-    });
-
-    installBtn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          installBtn.style.display = 'none';
-        }
-        deferredPrompt = null;
-      }
-    });
-    
-    document.addEventListener('focusin', function(e) {
-      if(e.target.tagName === 'TEXTAREA' || (e.target.tagName === 'INPUT' && e.target.type === 'text')) {
-        activeInput = e.target;
-      }
-    });
+    let count = 0; let activeInput = null; let uploadedWatermarkImage = null;
+    let deferredPrompt; const installBtn = document.getElementById('installBtn');
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; installBtn.style.display = 'inline-block'; });
+    installBtn.addEventListener('click', async () => { if (deferredPrompt) { deferredPrompt.prompt(); const { outcome } = await deferredPrompt.userChoice; if (outcome === 'accepted') { installBtn.style.display = 'none'; } deferredPrompt = null; } });
+    document.addEventListener('focusin', function(e) { if(e.target.tagName === 'TEXTAREA' || (e.target.tagName === 'INPUT' && e.target.type === 'text')) { activeInput = e.target; } });
 
     function toggleWatermarkInput() {
         let type = document.getElementById('watermarkType').value;
-        if(type === 'text') {
-            document.getElementById('watermarkText').style.display = 'block';
-            document.getElementById('watermarkImage').style.display = 'none';
-        } else {
-            document.getElementById('watermarkText').style.display = 'none';
-            document.getElementById('watermarkImage').style.display = 'block';
-        }
+        if(type === 'text') { document.getElementById('watermarkText').style.display = 'block'; document.getElementById('watermarkImage').style.display = 'none'; } 
+        else { document.getElementById('watermarkText').style.display = 'none'; document.getElementById('watermarkImage').style.display = 'block'; }
     }
 
     document.getElementById('watermarkImage').addEventListener('change', function(e) {
-        let file = e.target.files[0];
-        if(file) {
-            let reader = new FileReader();
-            reader.onload = function(event) {
-                uploadedWatermarkImage = event.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
+        let file = e.target.files[0]; if(file) { let reader = new FileReader(); reader.onload = function(event) { uploadedWatermarkImage = event.target.result; }; reader.readAsDataURL(file); }
     });
 
     function toggleMathToolbar() {
-      let type = document.getElementById('subjectType').value;
-      document.getElementById('math-toolbar').style.display = (type === 'math') ? 'block' : 'none';
-      let mathBtns = document.querySelectorAll('.math-btn');
-      mathBtns.forEach(btn => { btn.style.display = (type === 'math') ? 'inline-block' : 'none'; });
+      let type = document.getElementById('subjectType').value; document.getElementById('math-toolbar').style.display = (type === 'math') ? 'block' : 'none';
+      let mathBtns = document.querySelectorAll('.math-btn'); mathBtns.forEach(btn => { btn.style.display = (type === 'math') ? 'inline-block' : 'none'; });
     }
 
     function toggleAnswerFields() {
       let mode = document.getElementById('paperMode').value;
-      let showMode = document.getElementById('showAnswersMode').value;
-      
       let ansFields = document.querySelectorAll('.q-answer, .b-answer');
-      ansFields.forEach(field => {
-        if(showMode === 'always' || mode === 'table') {
-            field.style.display = 'block';
-        } else {
-            field.style.display = 'none';
-        }
-      });
+      ansFields.forEach(field => { field.style.display = (mode === 'model_answer' || mode === 'table') ? 'block' : 'none'; });
       document.getElementById('table-colors-group').style.display = (mode === 'table') ? 'block' : 'none';
     }
 
     function addQ() {
-      count++;
-      let currentType = document.getElementById('subjectType').value;
-      let mathDisplay = (currentType === 'math') ? 'inline-block' : 'none';
-      
-      let currentMode = document.getElementById('paperMode').value;
-      let showMode = document.getElementById('showAnswersMode').value;
-      let ansDisplay = (showMode === 'always' || currentMode === 'table') ? 'block' : 'none';
-      
-      let div = document.createElement('div');
-      div.className = 'question-block';
-      div.innerHTML = "<div style='display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; gap: 5px; flex-wrap: wrap;'>" +
-        "<div style='flex:1; display:flex; align-items:center; gap: 5px;'>" +
-          "<strong style='margin-left: 5px;'>س" + count + "</strong>" +
-          "<input type='text' class='q-title' placeholder='صيغة السؤال' style='flex-grow: 1; padding: 6px; font-size: 13px; border-color: red; color: red;'>" +
-          "<input type='text' class='q-marks' placeholder='الدرجة' style='width: 70px; padding: 6px; font-size: 13px;'>" +
-        "</div>" +
-        "<button type='button' class='btn btn-danger' onclick='this.parentElement.parentElement.remove()'>حذف</button>" +
-      "</div>" +
-      "<div style='margin-bottom: 8px;'>" +
-        "<button type='button' class='toolbar-btn' onmousedown='event.preventDefault(); insertSym(this, \" .................... \")'>➕ فراغ</button>" +
-        "<button type='button' class='toolbar-btn math-btn' style='display: " + mathDisplay + ";' onmousedown='event.preventDefault(); insertSym(this, \" ÷ \")'>÷</button>" +
-        "<button type='button' class='toolbar-btn math-btn' style='display: " + mathDisplay + ";' onmousedown='event.preventDefault(); insertSym(this, \" × \")'>×</button>" +
-        "<button type='button' class='toolbar-btn math-btn' style='display: " + mathDisplay + ";' onmousedown='event.preventDefault(); insertSym(this, \" √ \")'>√</button>" +
-      "</div>" +
-      "<textarea rows='2' class='q-text' placeholder='نص السؤال (يكتب هنا)'></textarea>" +
-      "<textarea rows='2' class='q-answer' placeholder='اكتب الجواب النموذجي هنا' style='display: " + ansDisplay + "; margin-top: 5px; border: 1px solid #8e44ad; background-color: #f5eef8;'></textarea>" +
-      "<div class='branches-container'></div>" +
-      "<div style='margin-top: 8px; text-align: right;'>" +
-        "<button type='button' class='btn' style='background: #e0e0e0; color: #333; padding: 6px 12px; font-size: 12px; border: 1px solid #ccc;' onclick='addBranch(this)'>" + 
-        "➕ إضافة فرع (أ، ب، ج)" + 
-        "</button>" +
-      "</div>";
+      count++; let currentType = document.getElementById('subjectType').value; let mathDisplay = (currentType === 'math') ? 'inline-block' : 'none';
+      let currentMode = document.getElementById('paperMode').value; let ansDisplay = (currentMode === 'model_answer' || currentMode === 'table') ? 'block' : 'none';
+      let div = document.createElement('div'); div.className = 'question-block';
+      div.innerHTML = "<div style='display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; gap: 5px; flex-wrap: wrap;'><div style='flex:1; display:flex; align-items:center; gap: 5px;'><strong style='margin-left: 5px;'>س" + count + "</strong><input type='text' class='q-title' placeholder='صيغة السؤال' style='flex-grow: 1; padding: 6px; font-size: 13px; border-color: red; color: red;'><input type='text' class='q-marks' placeholder='الدرجة' style='width: 70px; padding: 6px; font-size: 13px;'></div><button type='button' class='btn btn-danger' onclick='this.parentElement.parentElement.remove()'>حذف</button></div><div style='margin-bottom: 8px;'><button type='button' class='toolbar-btn' onmousedown='event.preventDefault(); insertSym(this, \" .................... \")'>➕ فراغ</button><button type='button' class='toolbar-btn math-btn' style='display: " + mathDisplay + ";' onmousedown='event.preventDefault(); insertSym(this, \" ÷ \")'>÷</button><button type='button' class='toolbar-btn math-btn' style='display: " + mathDisplay + ";' onmousedown='event.preventDefault(); insertSym(this, \" × \")'>×</button><button type='button' class='toolbar-btn math-btn' style='display: " + mathDisplay + ";' onmousedown='event.preventDefault(); insertSym(this, \" √ \")'>√</button></div><textarea rows='2' class='q-text' placeholder='نص السؤال (يكتب هنا)'></textarea><textarea rows='2' class='q-answer' placeholder='اكتب الجواب النموذجي هنا' style='display: " + ansDisplay + "; margin-top: 5px; border: 1px solid #8e44ad; background-color: #f5eef8;'></textarea><div class='branches-container'></div><div style='margin-top: 8px; text-align: right;'><button type='button' class='btn' style='background: #e0e0e0; color: #333; padding: 6px 12px; font-size: 12px; border: 1px solid #ccc;' onclick='addBranch(this)'>➕ إضافة فرع (أ، ب، ج)</button></div>";
       document.getElementById('q-container').appendChild(div);
     }
     
     function addBranch(btn) {
-      let container = btn.parentElement.previousElementSibling;
-      let branchCount = container.children.length;
-      let alphabet = ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح', 'ط', 'ي'];
-      let currentLetter = alphabet[branchCount] || '-';
-      
-      let currentMode = document.getElementById('paperMode').value;
-      let showMode = document.getElementById('showAnswersMode').value;
-      let ansDisplay = (showMode === 'always' || currentMode === 'table') ? 'block' : 'none';
-      
-      let branchDiv = document.createElement('div');
-      branchDiv.className = 'b-block';
-      branchDiv.style.marginTop = '10px';
-      branchDiv.style.padding = '10px';
-      branchDiv.style.border = '1px dashed #aaa';
-      branchDiv.style.borderRadius = '6px';
-      branchDiv.style.backgroundColor = '#f0f4f8';
-      
-      branchDiv.innerHTML = "<div style='display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; gap: 5px; flex-wrap: wrap;'>" +
-        "<div style='flex:1; display:flex; align-items:center; gap: 5px;'>" +
-          "<strong class='b-label' style='margin-left: 5px;'>فرع (" + currentLetter + ")</strong>" +
-          "<input type='text' class='b-title' placeholder='صيغة الفرع' style='flex-grow: 1; padding: 6px; font-size: 13px; border-color: red; color: red;'>" +
-          "<input type='text' class='b-marks' placeholder='الدرجة' style='width: 70px; padding: 6px; font-size: 13px;'>" +
-        "</div>" +
-        "<button type='button' class='btn btn-danger' style='padding: 4px 8px; font-size: 12px;' onclick='this.parentElement.parentElement.remove(); updateBranches(this.closest(\".branches-container\"));'>حذف</button>" +
-      "</div>" +
-      "<textarea rows='2' class='b-text' placeholder='اكتب نص الفرع هنا...'></textarea>" +
-      "<textarea rows='1' class='b-answer' placeholder='جواب الفرع' style='display: " + ansDisplay + "; width: 100%; padding: 6px; font-size: 13px; border: 1px solid #8e44ad; background-color: #f5eef8; margin-top: 5px; border-radius: 4px;'></textarea>";
-      
+      let container = btn.parentElement.previousElementSibling; let branchCount = container.children.length;
+      let alphabet = ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح', 'ط', 'ي']; let currentLetter = alphabet[branchCount] || '-';
+      let currentMode = document.getElementById('paperMode').value; let ansDisplay = (currentMode === 'model_answer' || currentMode === 'table') ? 'block' : 'none';
+      let branchDiv = document.createElement('div'); branchDiv.className = 'b-block'; branchDiv.style.marginTop = '10px'; branchDiv.style.padding = '10px'; branchDiv.style.border = '1px dashed #aaa'; branchDiv.style.borderRadius = '6px'; branchDiv.style.backgroundColor = '#f0f4f8';
+      branchDiv.innerHTML = "<div style='display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; gap: 5px; flex-wrap: wrap;'><div style='flex:1; display:flex; align-items:center; gap: 5px;'><strong class='b-label' style='margin-left: 5px;'>فرع (" + currentLetter + ")</strong><input type='text' class='b-title' placeholder='صيغة الفرع' style='flex-grow: 1; padding: 6px; font-size: 13px; border-color: red; color: red;'><input type='text' class='b-marks' placeholder='الدرجة' style='width: 70px; padding: 6px; font-size: 13px;'></div><button type='button' class='btn btn-danger' style='padding: 4px 8px; font-size: 12px;' onclick='this.parentElement.parentElement.remove(); updateBranches(this.closest(\".branches-container\"));'>حذف</button></div><textarea rows='2' class='b-text' placeholder='اكتب نص الفرع هنا...'></textarea><textarea rows='1' class='b-answer' placeholder='جواب الفرع' style='display: " + ansDisplay + "; width: 100%; padding: 6px; font-size: 13px; border: 1px solid #8e44ad; background-color: #f5eef8; margin-top: 5px; border-radius: 4px;'></textarea>";
       container.appendChild(branchDiv);
     }
     
     function updateBranches(container) {
-      let alphabet = ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح', 'ط', 'ي'];
-      let blocks = container.querySelectorAll('.b-block');
-      blocks.forEach((block, index) => {
-        let label = block.querySelector('.b-label');
-        if(label) label.innerText = 'فرع (' + alphabet[index] + ')';
-      });
+      let alphabet = ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح', 'ط', 'ي']; let blocks = container.querySelectorAll('.b-block');
+      blocks.forEach((block, index) => { let label = block.querySelector('.b-label'); if(label) label.innerText = 'فرع (' + alphabet[index] + ')'; });
     }
     
-    function insertSym(btn, sym) {
-      let qBlock = btn.closest('.question-block');
-      let ta = (activeInput && qBlock.contains(activeInput)) ? activeInput : qBlock.querySelector('.q-text');
-      let s = ta.selectionStart, e = ta.selectionEnd, v = ta.value;
-      ta.value = v.substring(0, s) + sym + v.substring(e);
-      ta.focus(); ta.selectionEnd = s + sym.length;
-    }
-
-    function insertSymGlobal(sym) {
-      if(activeInput) {
-        let s = activeInput.selectionStart, e = activeInput.selectionEnd, v = activeInput.value;
-        activeInput.value = v.substring(0, s) + sym + v.substring(e);
-        activeInput.focus(); activeInput.selectionEnd = s + sym.length;
-      }
-    }
+    function insertSym(btn, sym) { let qBlock = btn.closest('.question-block'); let ta = (activeInput && qBlock.contains(activeInput)) ? activeInput : qBlock.querySelector('.q-text'); let s = ta.selectionStart, e = ta.selectionEnd, v = ta.value; ta.value = v.substring(0, s) + sym + v.substring(e); ta.focus(); ta.selectionEnd = s + sym.length; }
+    function insertSymGlobal(sym) { if(activeInput) { let s = activeInput.selectionStart, e = activeInput.selectionEnd, v = activeInput.value; activeInput.value = v.substring(0, s) + sym + v.substring(e); activeInput.focus(); activeInput.selectionEnd = s + sym.length; } }
     
     function preparePaper(isAnswerKey) {
-      let pSize = document.getElementById('paperSize').value;
-      let subjectType = document.getElementById('subjectType').value;
-      let paperMode = document.getElementById('paperMode').value;
-      let divStyle = document.getElementById('dividerStyle').value;
-      let preview = document.getElementById('paper-preview');
-      let isEnglish = (subjectType === 'english');
+      let pSize = document.getElementById('paperSize').value; let subjectType = document.getElementById('subjectType').value; let paperMode = document.getElementById('paperMode').value; let divStyle = document.getElementById('dividerStyle').value; let preview = document.getElementById('paper-preview'); let isEnglish = (subjectType === 'english');
       
-      preview.style.fontSize = document.getElementById('fontSize').value;
-      preview.style.color = document.getElementById('textColor').value;
-      preview.style.backgroundColor = document.getElementById('bgColor').value;
+      let numFormat = document.getElementById('numberFormat').value;
+      let fmtNum = function(str) { if(typeof str !== 'string') return str; if(numFormat === 'hindi') { return str.replace(/[0-9]/g, w => ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'][w]); } return str; };
       
-      let pattern = document.getElementById('bgPattern').value;
-      let pColor = document.getElementById('textColor').value.replace('#', '%23');
+      preview.style.fontSize = document.getElementById('fontSize').value; preview.style.color = document.getElementById('textColor').value; preview.style.backgroundColor = document.getElementById('bgColor').value;
+      let pattern = document.getElementById('bgPattern').value; let pColor = document.getElementById('textColor').value.replace('#', '%23');
       
-      if(pattern === 'islamic1') {
-         preview.style.backgroundImage = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='" + pColor + "' fill-opacity='0.05'%3E%3Cpath d='M0 0h40v40H0V0zm40 40h40v40H40V40zm0-40h2l-2 2h-2l2-2zm0 40h2l-2 2h-2l2-2zM0 40h2l-2 2h-2l2-2zm40-40H20v20h20V0zm0 40H20v20h20V40zm20 20v-20h20v20H60zm-40-40v-20h20v20H20zM0 0v20h20V0H0zm40 40v20h20V40H40z'/%3E%3C/g%3E%3C/svg%3E\")";
-         preview.style.backgroundSize = '80px 80px';
-      } else if(pattern === 'andalusi') {
-         preview.style.backgroundImage = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='" + pColor + "' fill-opacity='0.04'%3E%3Cpath d='M30 60L0 30 30 0l30 30-30 30zm0-10l20-20-20-20-20 20 20 20z'/%3E%3C/g%3E%3C/svg%3E\")";
-         preview.style.backgroundSize = '60px 60px';
-      } else if(pattern === 'diagonal') {
-         preview.style.backgroundImage = 'repeating-linear-gradient(45deg, transparent, transparent 10px, ' + document.getElementById('textColor').value + '08 10px, ' + document.getElementById('textColor').value + '08 11px)';
-         preview.style.backgroundSize = '100% 100%';
-      } else if(pattern === 'radial') {
-         preview.style.backgroundImage = 'radial-gradient(circle at center, ' + document.getElementById('textColor').value + '08 0%, transparent 70%)';
-         preview.style.backgroundSize = '100% 100%';
-      } else {
-         preview.style.backgroundImage = 'none';
-      }
+      if(pattern === 'islamic1') { preview.style.backgroundImage = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='" + pColor + "' fill-opacity='0.05'%3E%3Cpath d='M0 0h40v40H0V0zm40 40h40v40H40V40zm0-40h2l-2 2h-2l2-2zm0 40h2l-2 2h-2l2-2zM0 40h2l-2 2h-2l2-2zm40-40H20v20h20V0zm0 40H20v20h20V40zm20 20v-20h20v20H60zm-40-40v-20h20v20H20zM0 0v20h20V0H0zm40 40v20h20V40H40z'/%3E%3C/g%3E%3C/svg%3E\")"; preview.style.backgroundSize = '80px 80px'; } 
+      else if(pattern === 'andalusi') { preview.style.backgroundImage = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='" + pColor + "' fill-opacity='0.04'%3E%3Cpath d='M30 60L0 30 30 0l30 30-30 30zm0-10l20-20-20-20-20 20 20 20z'/%3E%3C/g%3E%3C/svg%3E\")"; preview.style.backgroundSize = '60px 60px'; } 
+      else if(pattern === 'diagonal') { preview.style.backgroundImage = 'repeating-linear-gradient(45deg, transparent, transparent 10px, ' + document.getElementById('textColor').value + '08 10px, ' + document.getElementById('textColor').value + '08 11px)'; preview.style.backgroundSize = '100% 100%'; } 
+      else if(pattern === 'radial') { preview.style.backgroundImage = 'radial-gradient(circle at center, ' + document.getElementById('textColor').value + '08 0%, transparent 70%)'; preview.style.backgroundSize = '100% 100%'; } 
+      else { preview.style.backgroundImage = 'none'; }
       
-      let bStyle = document.getElementById('borderStyle').value;
-      let bWidth = document.getElementById('borderWidth').value;
-      let bColor = document.getElementById('borderColor').value;
-      
-      if(bStyle === 'none') {
-          preview.style.border = 'none';
-          preview.style.outline = 'none';
-          preview.style.borderRadius = '0';
-      } else if(bStyle === 'rounded') {
-          preview.style.border = bWidth + ' solid ' + bColor;
-          preview.style.outline = 'none';
-          preview.style.borderRadius = '20px';
-      } else {
-          preview.style.border = bWidth + ' ' + bStyle + ' ' + bColor;
-          preview.style.outline = '1px solid ' + bColor;
-          preview.style.outlineOffset = '-8px';
-          preview.style.borderRadius = '0';
-      }
+      let bStyle = document.getElementById('borderStyle').value; let bWidth = document.getElementById('borderWidth').value; let bColor = document.getElementById('borderColor').value;
+      if(bStyle === 'none') { preview.style.border = 'none'; preview.style.outline = 'none'; preview.style.borderRadius = '0'; } 
+      else if(bStyle === 'rounded') { preview.style.border = bWidth + ' solid ' + bColor; preview.style.outline = 'none'; preview.style.borderRadius = '20px'; } 
+      else { preview.style.border = bWidth + ' ' + bStyle + ' ' + bColor; preview.style.outline = '1px solid ' + bColor; preview.style.outlineOffset = '-8px'; preview.style.borderRadius = '0'; }
 
-      preview.className = 'size-' + pSize;
-      
-      let qsContainer = document.getElementById('pv-qs');
-      qsContainer.style.direction = isEnglish ? 'ltr' : 'rtl';
-      qsContainer.style.textAlign = isEnglish ? 'left' : 'right';
-
+      preview.className = 'size-' + pSize; let qsContainer = document.getElementById('pv-qs'); qsContainer.style.direction = isEnglish ? 'ltr' : 'rtl'; qsContainer.style.textAlign = isEnglish ? 'left' : 'right';
       document.getElementById('pv-basmala').style.display = (document.getElementById('basmala').value === 'yes') ? 'block' : 'none';
-      
-      let dirVal = document.getElementById('directorate').value;
-      if(dirVal) {
-          document.getElementById('pv-directorate').style.display = 'inline';
-          document.getElementById('pv-directorate').innerText = dirVal;
-          document.getElementById('pv-dir-br').style.display = 'inline';
-      } else {
-          document.getElementById('pv-directorate').style.display = 'none';
-          document.getElementById('pv-dir-br').style.display = 'none';
-      }
+      let dirVal = fmtNum(document.getElementById('directorate').value); if(dirVal) { document.getElementById('pv-directorate').style.display = 'inline'; document.getElementById('pv-directorate').innerText = dirVal; document.getElementById('pv-dir-br').style.display = 'inline'; } else { document.getElementById('pv-directorate').style.display = 'none'; document.getElementById('pv-dir-br').style.display = 'none'; }
 
-      let watermarkElem = document.getElementById('pv-watermark');
-      let wmType = document.getElementById('watermarkType').value;
-      
-      if(wmType === 'text') {
-          let wmText = document.getElementById('watermarkText').value;
-          if(wmText) {
-              watermarkElem.style.display = 'flex';
-              watermarkElem.innerHTML = wmText;
-              watermarkElem.style.transform = 'translate(-50%, -50%) rotate(-45deg)';
-          } else {
-              watermarkElem.style.display = 'none';
-          }
-      } else {
-          if(uploadedWatermarkImage) {
-              watermarkElem.style.display = 'flex';
-              watermarkElem.innerHTML = "<img src='" + uploadedWatermarkImage + "' style='max-width: 60%; max-height: 60%; opacity: 0.15; object-fit: contain;'>";
-              watermarkElem.style.transform = 'translate(-50%, -50%)'; 
-          } else {
-              watermarkElem.style.display = 'none';
-          }
-      }
+      let watermarkElem = document.getElementById('pv-watermark'); let wmType = document.getElementById('watermarkType').value;
+      if(wmType === 'text') { let wmText = fmtNum(document.getElementById('watermarkText').value); if(wmText) { watermarkElem.style.display = 'flex'; watermarkElem.innerHTML = wmText; watermarkElem.style.transform = 'translate(-50%, -50%) rotate(-45deg)'; } else { watermarkElem.style.display = 'none'; } } 
+      else { if(uploadedWatermarkImage) { watermarkElem.style.display = 'flex'; watermarkElem.innerHTML = "<img src='" + uploadedWatermarkImage + "' style='max-width: 60%; max-height: 60%; opacity: 0.15; object-fit: contain;'>"; watermarkElem.style.transform = 'translate(-50%, -50%)'; } else { watermarkElem.style.display = 'none'; } }
 
-      document.getElementById('pv-school').innerText = document.getElementById('school').value;
+      document.getElementById('pv-school').innerText = fmtNum(document.getElementById('school').value);
       
-      let examTypeBase = document.getElementById('examType').value;
-      document.getElementById('pv-type').innerText = examTypeBase + (isAnswerKey ? " - (الجواب النموذجي)" : "");
+      // التغيير الذكي للترويسة حسب نوع النسخة المطبوعة
+      let examTypeBase = fmtNum(document.getElementById('examType').value);
+      if (isAnswerKey) {
+          document.getElementById('pv-type').innerText = "أجوبة " + examTypeBase;
+      } else {
+          document.getElementById('pv-type').innerText = examTypeBase;
+      }
       
-      document.getElementById('pv-subject').innerText = document.getElementById('subject').value;
-      document.getElementById('pv-grade').innerText = document.getElementById('grade').value;
-      document.getElementById('pv-year').innerText = document.getElementById('year').value;
-      document.getElementById('pv-date').innerText = document.getElementById('examDate').value;
-      document.getElementById('pv-time').innerText = document.getElementById('examTime').value;
-      document.getElementById('pv-teacher-title').innerText = document.getElementById('teacherTitle').value;
-      document.getElementById('pv-teacher-name').innerText = document.getElementById('teacherName').value;
-      document.getElementById('pv-note').innerText = document.getElementById('examNote').value;
+      document.getElementById('pv-subject').innerText = fmtNum(document.getElementById('subject').value); document.getElementById('pv-grade').innerText = fmtNum(document.getElementById('grade').value); document.getElementById('pv-year').innerText = fmtNum(document.getElementById('year').value); document.getElementById('pv-date').innerText = fmtNum(document.getElementById('examDate').value); document.getElementById('pv-time').innerText = fmtNum(document.getElementById('examTime').value); document.getElementById('pv-teacher-title').innerText = fmtNum(document.getElementById('teacherTitle').value); document.getElementById('pv-teacher-name').innerText = fmtNum(document.getElementById('teacherName').value); document.getElementById('pv-note').innerText = fmtNum(document.getElementById('examNote').value);
+      let pq = document.getElementById('pv-qs'); pq.innerHTML = "";
       
-      let pq = document.getElementById('pv-qs');
-      pq.innerHTML = "";
-      
-      let blocks = document.querySelectorAll('.question-block');
-      let validBlocks = Array.from(blocks).filter(b => b.querySelector('.q-text').value.trim() !== "" || b.querySelector('.q-title').value.trim() !== "" || b.querySelectorAll('.b-block').length > 0);
-      
-      let alphabet = isEnglish ? ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] : ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح', 'ط', 'ي'];
-      let padSide = isEnglish ? "padding-left" : "padding-right";
-      let floatSide = isEnglish ? "right" : "left";
+      let blocks = document.querySelectorAll('.question-block'); let validBlocks = Array.from(blocks).filter(b => b.querySelector('.q-text').value.trim() !== "" || b.querySelector('.q-title').value.trim() !== "" || b.querySelectorAll('.b-block').length > 0);
+      let alphabet = isEnglish ? ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] : ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح', 'ط', 'ي']; let padSide = isEnglish ? "padding-left" : "padding-right"; let floatSide = isEnglish ? "right" : "left";
 
       if(paperMode === 'table') {
-         let qColor = document.getElementById('qColor').value;
-         let aColor = document.getElementById('aColor').value;
-         let thQ = isEnglish ? "Question" : "السؤال";
-         let thA = isEnglish ? "Answer" : "الجواب";
-         
+         let qColor = document.getElementById('qColor').value; let aColor = document.getElementById('aColor').value; let thQ = isEnglish ? "Question" : "السؤال"; let thA = isEnglish ? "Answer" : "الجواب";
          let tableHTML = "<table class='exam-table'><tr><th style='width: 50%; text-align: center; background-color: " + qColor + ";'>" + thQ + "</th><th style='width: 50%; text-align: center; background-color: " + aColor + ";'>" + thA + "</th></tr>";
-         
          validBlocks.forEach((b, i) => {
-            let qTitle = b.querySelector('.q-title').value.trim();
-            let qText = b.querySelector('.q-text').value.replace(/\n/g, '<br>');
-            let qAnswerVal = b.querySelector('.q-answer') ? b.querySelector('.q-answer').value.replace(/\n/g, '<br>') : "";
-            let qMarks = b.querySelector('.q-marks') ? b.querySelector('.q-marks').value.trim() : "";
-            let qLabel = isEnglish ? "Q" + (i+1) + ". " : "س" + (i+1) + ": ";
+            let qTitle = fmtNum(b.querySelector('.q-title').value.trim()); let qText = fmtNum(b.querySelector('.q-text').value).replace(/\n/g, '<br>');
+            let qAnswerVal = b.querySelector('.q-answer') ? fmtNum(b.querySelector('.q-answer').value).replace(/\n/g, '<br>') : "";
+            let qMarks = b.querySelector('.q-marks') ? fmtNum(b.querySelector('.q-marks').value.trim()) : "";
+            let qNum = fmtNum((i+1).toString()); let qLabel = isEnglish ? "Q" + qNum + ". " : "س" + qNum + ": ";
             let qMarksHtml = qMarks ? " <span style='color: inherit; font-size: 0.9em; opacity: 0.8; white-space: nowrap;'>(" + qMarks + ")</span>" : "";
-            
             let finalTableAnswer = isAnswerKey ? qAnswerVal : "";
-            
             tableHTML += "<tr><td style='background-color: " + qColor + ";'><strong>" + qLabel + "</strong>" + (qTitle ? "<span style='color:inherit; opacity: 0.9; margin: 0 5px;'>"+qTitle+"</span><br>" : "") + qText + qMarksHtml + "</td><td style='background-color: " + aColor + ";'>" + finalTableAnswer + "</td></tr>";
          });
-         tableHTML += "</table>";
-         pq.innerHTML = tableHTML;
+         tableHTML += "</table>"; pq.innerHTML = tableHTML;
       } else {
           validBlocks.forEach((b, i) => {
-            let qTitle = b.querySelector('.q-title').value.trim();
-            let qText = b.querySelector('.q-text').value.replace(/\n/g, '<br>');
-            let qMarks = b.querySelector('.q-marks') ? b.querySelector('.q-marks').value.trim() : "";
-            let qAnswerVal = b.querySelector('.q-answer') ? b.querySelector('.q-answer').value.replace(/\n/g, '<br>') : "";
-            
-            let qNum = (i+1).toString();
-            let qLabel = isEnglish ? "Q" + qNum + ". " : "س" + qNum + ": ";
-            
-            let borderStyle = "";
-            let customDivider = "";
-            if (i < validBlocks.length - 1) {
-                if(divStyle === 'dashed') borderStyle = "border-bottom: 2px dashed currentColor;";
-                else if(divStyle === 'solid') borderStyle = "border-bottom: 2px solid currentColor;";
-                else if(divStyle === 'dotted') borderStyle = "border-bottom: 2px dotted currentColor;";
-                else if(divStyle === 'stars') customDivider = "<div style='text-align:center; letter-spacing: 15px; margin-top: 15px; font-size: 1.2em;'>⭐ ⭐ ⭐</div>";
-                else if(divStyle === 'floral') customDivider = "<div style='text-align:center; letter-spacing: 15px; margin-top: 15px; font-size: 1.2em;'>🌺 🌺 🌺</div>";
-            }
-            
-            let titleHtml = qTitle ? "<span style='color: inherit; opacity: 0.9; margin: 0 8px; font-size: 1em;'>" + qTitle + "</span>" : "";
-            let mainTextHtml = qText ? "<div style='font-size: 1em; line-height: 1.5; " + padSide + ": 15px; margin-top: 4px;'>" + qText + "</div>" : "";
-            let qMarksHtml = qMarks ? "<span style='float: " + floatSide + "; font-size: 0.95em; font-weight: bold; margin: 0 10px;'>(" + qMarks + ")</span>" : "";
-            
+            let qTitle = fmtNum(b.querySelector('.q-title').value.trim()); let qText = fmtNum(b.querySelector('.q-text').value).replace(/\n/g, '<br>'); let qMarks = b.querySelector('.q-marks') ? fmtNum(b.querySelector('.q-marks').value.trim()) : ""; let qAnswerVal = b.querySelector('.q-answer') ? fmtNum(b.querySelector('.q-answer').value).replace(/\n/g, '<br>') : "";
+            let qNum = fmtNum((i+1).toString()); let qLabel = isEnglish ? "Q" + qNum + ". " : "س" + qNum + ": ";
+            let borderStyle = ""; let customDivider = "";
+            if (i < validBlocks.length - 1) { if(divStyle === 'dashed') borderStyle = "border-bottom: 2px dashed currentColor;"; else if(divStyle === 'solid') borderStyle = "border-bottom: 2px solid currentColor;"; else if(divStyle === 'dotted') borderStyle = "border-bottom: 2px dotted currentColor;"; else if(divStyle === 'stars') customDivider = "<div style='text-align:center; letter-spacing: 15px; margin-top: 15px; font-size: 1.2em;'>⭐ ⭐ ⭐</div>"; else if(divStyle === 'floral') customDivider = "<div style='text-align:center; letter-spacing: 15px; margin-top: 15px; font-size: 1.2em;'>🌺 🌺 🌺</div>"; }
+            let titleHtml = qTitle ? "<span style='color: inherit; opacity: 0.9; margin: 0 8px; font-size: 1em;'>" + qTitle + "</span>" : ""; let mainTextHtml = qText ? "<div style='font-size: 1em; line-height: 1.5; " + padSide + ": 15px; margin-top: 4px;'>" + qText + "</div>" : ""; let qMarksHtml = qMarks ? "<span style='float: " + floatSide + "; font-size: 0.95em; font-weight: bold; margin: 0 10px;'>(" + qMarks + ")</span>" : "";
             let mainAnswerHtml = (isAnswerKey && qAnswerVal) ? "<div style='margin: 8px 15px 0 15px; color: #8e44ad; font-weight: bold; padding: 5px; border-radius: 4px; border: 1px dashed #8e44ad; background: rgba(142,68,173,0.05);'>الجواب: " + qAnswerVal + "</div>" : "";
-            
-            let branchesHtml = "";
-            let bBlocks = b.querySelectorAll('.b-block');
-            let bIndex = 0;
-            
+            let branchesHtml = ""; let bBlocks = b.querySelectorAll('.b-block'); let bIndex = 0;
             bBlocks.forEach(bb => {
-              let bTitleVal = bb.querySelector('.b-title').value.trim();
-              let bTextVal = bb.querySelector('.b-text').value.replace(/\n/g, '<br>');
-              let bMarksVal = bb.querySelector('.b-marks') ? bb.querySelector('.b-marks').value.trim() : "";
-              let bAnswerVal = bb.querySelector('.b-answer') ? bb.querySelector('.b-answer').value.replace(/\n/g, '<br>') : "";
-              
+              let bTitleVal = fmtNum(bb.querySelector('.b-title').value.trim()); let bTextVal = fmtNum(bb.querySelector('.b-text').value).replace(/\n/g, '<br>'); let bMarksVal = bb.querySelector('.b-marks') ? fmtNum(bb.querySelector('.b-marks').value.trim()) : ""; let bAnswerVal = bb.querySelector('.b-answer') ? fmtNum(bb.querySelector('.b-answer').value).replace(/\n/g, '<br>') : "";
               if(bTitleVal !== "" || bTextVal.trim() !== "") {
-                let bTitleHtml = bTitleVal ? "<span style='color: inherit; opacity: 0.9; margin: 0 8px; font-size: 1em;'>" + bTitleVal + "</span>" : "";
-                let branchLabel = isEnglish ? alphabet[bIndex] + ") " : alphabet[bIndex] + " / ";
-                let bMarksHtml = bMarksVal ? "<span style='float: " + floatSide + "; font-size: 0.9em; font-weight: bold; margin: 0 10px;'>(" + bMarksVal + ")</span>" : "";
-                
+                let bTitleHtml = bTitleVal ? "<span style='color: inherit; opacity: 0.9; margin: 0 8px; font-size: 1em;'>" + bTitleVal + "</span>" : ""; let branchLabel = isEnglish ? alphabet[bIndex] + ") " : alphabet[bIndex] + " / "; let bMarksHtml = bMarksVal ? "<span style='float: " + floatSide + "; font-size: 0.9em; font-weight: bold; margin: 0 10px;'>(" + bMarksVal + ")</span>" : "";
                 let bAnswerHtml = (isAnswerKey && bAnswerVal) ? "<div style='margin: 5px 25px 0 25px; color: #8e44ad; font-weight: bold; padding: 4px; border: 1px dashed #8e44ad; background: rgba(142,68,173,0.05);'>الجواب: " + bAnswerVal + "</div>" : "";
-                
-                branchesHtml += "<div style='margin-top: 12px; " + padSide + ": 20px; font-size: 1em; overflow: hidden;'>" +
-                  "<div style='margin-bottom: 4px;'>" + bMarksHtml + "<strong>" + branchLabel + "</strong>" + bTitleHtml + "</div>" +
-                  "<div style='" + padSide + ": 25px; line-height: 1.5;'>" + bTextVal + "</div>" +
-                  bAnswerHtml +
-                "</div>";
+                branchesHtml += "<div style='margin-top: 12px; " + padSide + ": 20px; font-size: 1em; overflow: hidden;'><div style='margin-bottom: 4px;'>" + bMarksHtml + "<strong>" + branchLabel + "</strong>" + bTitleHtml + "</div><div style='" + padSide + ": 25px; line-height: 1.5;'>" + bTextVal + "</div>" + bAnswerHtml + "</div>";
                 bIndex++;
               }
             });
-            
-            pq.innerHTML += "<div style='margin-bottom: 15px; padding-bottom: 15px; " + borderStyle + "'>" +
-              "<div style='margin-bottom: 8px; overflow: hidden;'>" + qMarksHtml + "<strong style='font-size: 1.1em;'>" + qLabel + "</strong> " + titleHtml + "</div>" +
-              mainTextHtml + mainAnswerHtml + branchesHtml + customDivider +
-            "</div>";
+            pq.innerHTML += "<div style='margin-bottom: 15px; padding-bottom: 15px; " + borderStyle + "'><div style='margin-bottom: 8px; overflow: hidden;'>" + qMarksHtml + "<strong style='font-size: 1.1em;'>" + qLabel + "</strong> " + titleHtml + "</div>" + mainTextHtml + mainAnswerHtml + branchesHtml + customDivider + "</div>";
           });
       }
     }
 
     function printPaper(isAnswerKey) {
-      preparePaper(isAnswerKey);
-      document.getElementById('paper-preview').style.display = 'flex';
-      window.print();
-      document.getElementById('paper-preview').style.display = 'none';
+      preparePaper(isAnswerKey); document.getElementById('paper-preview').style.display = 'flex'; window.print(); document.getElementById('paper-preview').style.display = 'none';
     }
-    
     function saveImage(isAnswerKey) {
-      preparePaper(isAnswerKey);
-      let editor = document.getElementById('editor-ui');
-      let preview = document.getElementById('paper-preview');
-      
-      editor.style.display = 'none';
-      preview.style.display = 'flex';
-      
-      setTimeout(() => {
-        html2canvas(preview, { scale: 2, backgroundColor: document.getElementById('bgColor').value }).then(canvas => {
-          let link = document.createElement('a');
-          link.download = isAnswerKey ? 'الجواب_النموذجي.png' : 'الأسئلة_الامتحانية.png';
-          link.href = canvas.toDataURL('image/png');
-          link.click();
-          
-          editor.style.display = 'block';
-          preview.style.display = 'none';
-        });
-      }, 300);
+      preparePaper(isAnswerKey); let editor = document.getElementById('editor-ui'); let preview = document.getElementById('paper-preview'); editor.style.display = 'none'; preview.style.display = 'flex';
+      setTimeout(() => { html2canvas(preview, { scale: 2, backgroundColor: document.getElementById('bgColor').value }).then(canvas => { let link = document.createElement('a'); link.download = isAnswerKey ? 'الجواب_النموذجي.png' : 'الأسئلة_الامتحانية.png'; link.href = canvas.toDataURL('image/png'); link.click(); editor.style.display = 'block'; preview.style.display = 'none'; }); }, 300);
     }
 
     addQ();
-    
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('sw.js').then(function(registration) {
-          console.log('تم تفعيل ميزة الأوفلاين بنجاح!');
-        }, function(err) {
-          console.log('فشل تفعيل الأوفلاين: ', err);
-        });
-      });
-    }
+    if ('serviceWorker' in navigator) { window.addEventListener('load', function() { navigator.serviceWorker.register('sw.js').then(function(reg) { console.log('Offline Ready'); }); }); }
   </script>
 </body>
 </html>
