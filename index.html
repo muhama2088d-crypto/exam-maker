@@ -310,6 +310,7 @@
             <div class="form-group"><label>نوع الامتحان</label><input type="text" id="examType" placeholder="امتحانات الشهر الأول"></div>
             <div class="form-group"><label>المادة</label><input type="text" id="subject" placeholder="العلوم"></div>
             <div class="form-group"><label>الصف والشعبة</label><input type="text" id="grade" placeholder="الخامس الابتدائي"></div>
+            <div class="form-group"><label>الدرجة الكلية (اختياري)</label><input type="number" id="totalMarks" placeholder="مثلاً 40" min="0" step="0.5"></div>
             <div class="form-group"><label>العام الدراسي</label><input type="text" id="year" placeholder="2026/2027"></div>
             <div class="form-group"><label>التاريخ</label><input type="text" id="examDate" placeholder="2026/11/1"></div>
             <div class="form-group"><label>الوقت</label><input type="text" id="examTime" placeholder="ساعة ونصف"></div>
@@ -336,6 +337,7 @@
             <button type="button" class="toolbar-btn" onclick="insertSymGlobal('°')">°</button>
             <button type="button" class="toolbar-btn" onclick="insertSymGlobal('≈')">≈</button>
           </div>
+          <div id="marks-summary" style="margin-bottom: 10px; padding: 8px 12px; background: #f1f8e9; border: 1px solid #c5e1a5; border-radius: 8px; font-size: 13px; font-weight: bold; color: #33691e;"></div>
           <div id="variant-tabs" style="display: none; margin-bottom: 10px; gap: 8px;">
             <button type="button" id="tab-a" class="variant-tab active" onclick="switchVariant('a')">📄 النموذج أ</button>
             <button type="button" id="tab-b" class="variant-tab" onclick="switchVariant('b')">📄 النموذج ب</button>
@@ -510,6 +512,7 @@
         if (b.querySelectorAll('.question-block').length === 0) addQ(b);   // نجهّز نموذج ب
       }
       applyVariantUI();
+      updateMarksSummary();
       scheduleSave();
     }
 
@@ -818,15 +821,83 @@
     }
 
     // يحبك الأسئلة والفروع — الترقيم يبدأ دائماً من س1
-    function buildQuestionsHTML(isAnswerKey, isEnglish, paperMode, divStyle, variant) {
-      let pq = "";
+    // الحصول على الأسئلة الفعّالة (غير الفارغة) لنموذج معيّن
+    function getValidBlocks(variant) {
       const qRoot = document.getElementById('q-container-' + (variant || 'a'));
-      const blocks = qRoot ? qRoot.querySelectorAll('.question-block') : [];
-      const validBlocks = Array.from(blocks).filter(function(b) {
+      if (!qRoot) return [];
+      return Array.from(qRoot.querySelectorAll('.question-block')).filter(function(b) {
         return b.querySelector('.q-text').value.trim() !== "" ||
                b.querySelector('.q-title').value.trim() !== "" ||
                b.querySelectorAll('.b-block').length > 0;
       });
+    }
+
+    // قراءة درجة رقمية (تدعم الأرقام العربية والكسور)
+    function parseMark(v) {
+      if (!v) return 0;
+      const arabicDigits = '٠١٢٣٤٥٦٧٨٩';
+      let s = String(v).replace(/[٠-٩]/g, function(d) { return arabicDigits.indexOf(d); });
+      const m = s.match(/\d+(?:[.,]\d+)?/);
+      if (!m) return 0;
+      return parseFloat(m[0].replace(',', '.')) || 0;
+    }
+
+    // درجة السؤال: درجته الصريحة، وإلا مجموع درجات فروعه (الفروع الفارغة لا تُحتسب)
+    function questionMark(block) {
+      const ownEl = block.querySelector('.q-marks');
+      const own = ownEl ? parseMark(ownEl.value) : 0;
+      if (own > 0) return own;
+      let sum = 0;
+      block.querySelectorAll('.b-block').forEach(function(b) {
+        const tEl = b.querySelector('.b-title');
+        const xEl = b.querySelector('.b-text');
+        const hasContent = (tEl && tEl.value.trim() !== '') || (xEl && xEl.value.trim() !== '');
+        if (!hasContent) return;
+        const el = b.querySelector('.b-marks');
+        if (el) sum += parseMark(el.value);
+      });
+      return sum;
+    }
+
+    function variantTotal(variant) {
+      return getValidBlocks(variant).reduce(function(sum, b) { return sum + questionMark(b); }, 0);
+    }
+
+    // ملخص الدرجات في المحرر
+    function updateMarksSummary() {
+      const el = document.getElementById('marks-summary');
+      if (!el) return;
+      const isA5 = document.getElementById('paperSize').value === 'A5';
+      const ta = variantTotal('a');
+      const tb = variantTotal('b');
+      const targetEl = document.getElementById('totalMarks');
+      const target = targetEl ? parseMark(targetEl.value) : 0;
+
+      let txt = '📊 مجموع الدرجات — النموذج أ: ' + ta;
+      if (isA5) txt += '  |  النموذج ب: ' + tb;
+
+      let bad = false;
+      if (target > 0) {
+        txt += '   (المطلوب: ' + target + ')';
+        if (Math.abs(ta - target) > 0.001) bad = true;
+        if (isA5 && Math.abs(tb - target) > 0.001) bad = true;
+      }
+      if (bad) {
+        txt += ' ⚠️ لا يطابق الدرجة المطلوبة';
+        el.style.background = '#ffebee';
+        el.style.borderColor = '#ef9a9a';
+        el.style.color = '#b71c1c';
+      } else {
+        el.style.background = '#f1f8e9';
+        el.style.borderColor = '#c5e1a5';
+        el.style.color = '#33691e';
+      }
+      el.textContent = txt;
+    }
+
+    function buildQuestionsHTML(isAnswerKey, isEnglish, paperMode, divStyle, variant) {
+      let pq = "";
+      const validBlocks = getValidBlocks(variant);
 
       const alphabet = isEnglish ? ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] : ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح', 'ط', 'ي'];
       const padSide = isEnglish ? "padding-left" : "padding-right";
@@ -968,6 +1039,9 @@
       const basmalaHtml = (v('basmala') === 'yes') ? '<div class="pv-basmala">بسم الله الرحمن الرحيم</div>' : '';
       const examTypeHtml = escHtml(v('examType')) + (isAnswerKey ? ' - (الجواب النموذجي)' : '');
 
+      const sheetTotal = variantTotal(variant);
+      const totalHtml = sheetTotal > 0 ? '<div style="font-size: 1em;">الدرجة الكلية: ' + sheetTotal + '</div>' : '';
+
       const headerHtml =
         '<div class="paper-header">' +
           '<div class="header-right">جمهورية العراق<br>وزارة التربية<br>' + dirLine +
@@ -975,6 +1049,7 @@
           '<div class="header-center">' +
             '<div class="exam-type-title">' + examTypeHtml + '</div>' +
             (isA5 ? '<div style="font-size: 1em;">(نموذج ' + (variant === 'b' ? 'ب' : 'أ') + ')</div>' : '') +
+            totalHtml +
             'للعام الدراسي ' + escHtml(v('year')) + '<br>الصف: ' + escHtml(v('grade')) +
           '</div>' +
           '<div class="header-left">المادة: ' + escHtml(v('subject')) +
@@ -1174,6 +1249,7 @@
         subject: document.getElementById('subject').value,
         grade: document.getElementById('grade').value,
         year: document.getElementById('year').value,
+        totalMarks: document.getElementById('totalMarks').value,
         examDate: document.getElementById('examDate').value,
         examTime: document.getElementById('examTime').value,
         teacherTitle: document.getElementById('teacherTitle').value,
@@ -1234,6 +1310,7 @@
         if (data.subject) document.getElementById('subject').value = data.subject;
         if (data.grade) document.getElementById('grade').value = data.grade;
         if (data.year) document.getElementById('year').value = data.year;
+        if (data.totalMarks) document.getElementById('totalMarks').value = data.totalMarks;
         if (data.examDate) document.getElementById('examDate').value = data.examDate;
         if (data.examTime) document.getElementById('examTime').value = data.examTime;
         if (data.teacherTitle) document.getElementById('teacherTitle').value = data.teacherTitle;
@@ -1280,6 +1357,8 @@
 
     document.addEventListener('input', scheduleSave);
     document.addEventListener('change', scheduleSave);
+    document.addEventListener('input', updateMarksSummary);
+    document.addEventListener('change', updateMarksSummary);
 
     function clearAll() {
       if (confirm('هل أنت متأكد؟ سيتم مسح كل البيانات والأسئلة نهائياً.')) {
@@ -1369,6 +1448,7 @@
     buildThemeGallery();
     const hadSavedData = loadFromLocal();
     applyVariantUI();
+    updateMarksSummary();
     if (!hadSavedData) {
       addQ();
     } else if (document.getElementById('paperSize').value === 'A5' &&
