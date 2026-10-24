@@ -62,6 +62,15 @@
     .header-left { text-align: left; flex: 1; }
     .exam-type-title { font-size: 1.3em; text-decoration: underline; margin-bottom: 6px; }
 
+    /* 🎨 معرض أنماط الورقة */
+    .theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; margin-bottom: 14px; }
+    .theme-tile { cursor: pointer; border-radius: 10px; padding: 6px; background: #fff; border: 2px solid #e3e6ea; transition: transform .15s, box-shadow .15s, border-color .15s; text-align: center; }
+    .theme-tile:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,.12); }
+    .theme-tile.active { border-color: #1976d2; box-shadow: 0 0 0 3px rgba(25,118,210,.18); }
+    .tt-preview { height: 56px; border-radius: 5px; margin-bottom: 6px; display: flex; flex-direction: column; justify-content: center; gap: 4px; padding: 6px 8px; overflow: hidden; }
+    .tt-line { height: 2px; border-radius: 1px; opacity: .7; }
+    .tt-name { font-size: 11px; font-weight: bold; color: #444; line-height: 1.4; }
+
     /* 🔔 إشعار الحفظ */
     .toast {
       position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
@@ -153,6 +162,15 @@
         <div class="card" style="border: 2px solid #1976d2;">
           <h3>🎨 تنسيق الورقة والألوان والفخامة</h3>
           <div class="grid">
+            <div class="form-group" style="grid-column: 1 / -1; background: #eef7ff; padding: 12px; border-radius: 8px; border: 1px dashed #64b5f6;">
+              <label style="color: #0d47a1; margin-bottom: 8px;">✨ أنماط جاهزة تتلاءم مع المادة والمرحلة</label>
+              <div id="theme-gallery" class="theme-grid"></div>
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <button type="button" class="btn btn-primary" style="padding: 8px 14px; font-size: 13px;" onclick="autoThemeBySubject()">🎯 اقترح النمط حسب المادة والمرحلة</button>
+                <button type="button" class="btn" style="padding: 8px 14px; font-size: 13px; background: #e0e0e0; color: #333; border: 1px solid #ccc;" onclick="clearThemeSelection()">↺ تخصيص يدوي</button>
+                <span id="themeHint" style="font-size: 12px; color: #37474f;"></span>
+              </div>
+            </div>
             <div class="form-group">
               <label>حجم الخط العام</label>
               <select id="fontSize">
@@ -216,6 +234,8 @@
                     <option value="andalusi">زخرفة أندلسية (معينات متداخلة)</option>
                     <option value="diagonal">خطوط مائلة (رسمية كلاسيكية)</option>
                     <option value="radial">تدرج إضاءة دائري (Spotlight)</option>
+                    <option value="grid">شبكة مربعات (للمواد العلمية)</option>
+                    <option value="dots">نقاط خفيفة (أنيقة وهادئة)</option>
                   </select>
                 </div>
             </div>
@@ -240,7 +260,39 @@
           <h3>بيانات الامتحان (الترويسة والختام)</h3>
           <div class="grid">
             <div class="form-group"><label>إظهار البسملة</label><select id="basmala"><option value="yes">نعم</option><option value="no">لا</option></select></div>
-            <div class="form-group"><label>المديرية (اختياري)</label><input type="text" id="directorate" placeholder="المديرية العامة لتربية..."></div>
+            <div class="form-group">
+              <label>المديرية العامة (اختياري)</label>
+              <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 5px;">
+                <input type="checkbox" id="showDirectorate" checked style="width: 17px; height: 17px; cursor: pointer; margin: 0;">
+                <span style="font-size: 12px; color: #666; cursor: pointer;">إظهارها في الورقة</span>
+              </div>
+              <input type="text" id="directorate" list="directorateList" placeholder="اكتب أو اختر المديرية...">
+              <datalist id="directorateList">
+                <option value="المديرية العامة لتربية بغداد - الرصافة الأولى"></option>
+                <option value="المديرية العامة لتربية بغداد - الرصافة الثانية"></option>
+                <option value="المديرية العامة لتربية بغداد - الرصافة الثالثة"></option>
+                <option value="المديرية العامة لتربية بغداد - الكرخ الأولى"></option>
+                <option value="المديرية العامة لتربية بغداد - الكرخ الثانية"></option>
+                <option value="المديرية العامة لتربية بغداد - الكرخ الثالثة"></option>
+                <option value="المديرية العامة لتربية البصرة"></option>
+                <option value="المديرية العامة لتربية نينوى"></option>
+                <option value="المديرية العامة لتربية النجف الأشرف"></option>
+                <option value="المديرية العامة لتربية كربلاء المقدسة"></option>
+                <option value="المديرية العامة لتربية بابل"></option>
+                <option value="المديرية العامة لتربية الأنبار"></option>
+                <option value="المديرية العامة لتربية ديالى"></option>
+                <option value="المديرية العامة لتربية ذي قار"></option>
+                <option value="المديرية العامة لتربية المثنى"></option>
+                <option value="المديرية العامة لتربية واسط"></option>
+                <option value="المديرية العامة لتربية ميسان"></option>
+                <option value="المديرية العامة لتربية القادسية"></option>
+                <option value="المديرية العامة لتربية كركوك"></option>
+                <option value="المديرية العامة لتربية صلاح الدين"></option>
+                <option value="المديرية العامة لتربية أربيل"></option>
+                <option value="المديرية العامة لتربية السليمانية"></option>
+                <option value="المديرية العامة لتربية دهوك"></option>
+              </datalist>
+            </div>
             <div class="form-group"><label>اسم المدرسة</label><input type="text" id="school" placeholder="مدرسة الأمل"></div>
             <div class="form-group"><label>نوع الامتحان</label><input type="text" id="examType" placeholder="امتحانات الشهر الأول"></div>
             <div class="form-group"><label>المادة</label><input type="text" id="subject" placeholder="العلوم"></div>
@@ -391,13 +443,34 @@
         }
     }
 
+    // تصغير الصورة قبل الحفظ — يمنع امتلاء مساحة التخزين (سقف localStorage = 5MB)
+    function compressImage(dataUrl, maxSide, done) {
+        let img = new Image();
+        img.onload = function() {
+            let w = img.width, h = img.height;
+            let scale = Math.min(1, maxSide / Math.max(w, h));
+            if (scale >= 1 && dataUrl.length < 300000) { done(dataUrl); return; }
+            w = Math.round(w * scale);
+            h = Math.round(h * scale);
+            let canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            let isPng = /^data:image\/png/i.test(dataUrl);
+            done(canvas.toDataURL(isPng ? 'image/png' : 'image/jpeg', 0.85));
+        };
+        img.onerror = function() { done(dataUrl); };
+        img.src = dataUrl;
+    }
+
     document.getElementById('watermarkImage').addEventListener('change', function(e) {
         let file = e.target.files[0];
         if(file) {
             let reader = new FileReader();
             reader.onload = function(event) {
-                uploadedWatermarkImage = event.target.result;
-                scheduleSave();
+                compressImage(event.target.result, 900, function(finalUrl) {
+                    uploadedWatermarkImage = finalUrl;
+                    scheduleSave();
+                });
             };
             reader.readAsDataURL(file);
         }
@@ -460,6 +533,7 @@
       "</div>";
       document.getElementById('q-container').appendChild(div);
       scheduleSave();
+      return div;
     }
     
     function deleteQuestion(btn) {
@@ -482,7 +556,10 @@
     }
     
     function addBranch(btn) {
-      let container = btn.parentElement.previousElementSibling;
+      return addBranchTo(btn.parentElement.previousElementSibling);
+    }
+
+    function addBranchTo(container) {
       let branchCount = container.children.length;
       let alphabet = ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح', 'ط', 'ي'];
       let currentLetter = alphabet[branchCount] || '-';
@@ -511,7 +588,9 @@
       "<textarea rows='1' class='b-answer' placeholder='جواب الفرع' style='display: " + ansDisplay + "; width: 100%; padding: 6px; font-size: 13px; border: 1px solid #8e44ad; background-color: #f5eef8; margin-top: 5px; border-radius: 4px;'></textarea>";
       
       container.appendChild(branchDiv);
+      updateBranches(container);
       scheduleSave();
+      return branchDiv;
     }
     
     function deleteBranch(btn) {
@@ -549,6 +628,164 @@
       }
     }
     
+    // ═══════════════════════════════════════════
+    // 🎨 أنماط الورقة الجاهزة (تتلاءم مع المادة والمرحلة)
+    // ═══════════════════════════════════════════
+    let selectedTheme = '';
+
+    // يرجع خلفية النقش وحجمها لأي نمط
+    function getPatternCSS(pattern, colorHex) {
+      const p = (colorHex || '#000000').replace('#', '%23');
+      switch (pattern) {
+        case 'islamic1':
+          return {
+            image: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='" + p + "' fill-opacity='0.05'%3E%3Cpath d='M0 0h40v40H0V0zm40 40h40v40H40V40zm0-40h2l-2 2h-2l2-2zm0 40h2l-2 2h-2l2-2zM0 40h2l-2 2h-2l2-2zm40-40H20v20h20V0zm0 40H20v20h20V40zm20 20v-20h20v20H60zm-40-40v-20h20v20H20zM0 0v20h20V0H0zm40 40v20h20V40H40z'/%3E%3C/g%3E%3C/svg%3E\")",
+            size: '80px 80px'
+          };
+        case 'andalusi':
+          return {
+            image: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='" + p + "' fill-opacity='0.04'%3E%3Cpath d='M30 60L0 30 30 0l30 30-30 30zm0-10l20-20-20-20-20 20 20 20z'/%3E%3C/g%3E%3C/svg%3E\")",
+            size: '60px 60px'
+          };
+        case 'diagonal':
+          return {
+            image: 'repeating-linear-gradient(45deg, transparent, transparent 10px, ' + colorHex + '08 10px, ' + colorHex + '08 11px)',
+            size: '100% 100%'
+          };
+        case 'radial':
+          return {
+            image: 'radial-gradient(circle at center, ' + colorHex + '08 0%, transparent 70%)',
+            size: '100% 100%'
+          };
+        case 'grid':
+          return {
+            image: 'repeating-linear-gradient(0deg, transparent, transparent 16px, ' + colorHex + '12 16px, ' + colorHex + '12 17px), repeating-linear-gradient(90deg, transparent, transparent 16px, ' + colorHex + '12 16px, ' + colorHex + '12 17px)',
+            size: '100% 100%'
+          };
+        case 'dots':
+          return {
+            image: 'radial-gradient(' + colorHex + '22 1px, transparent 1.6px)',
+            size: '14px 14px'
+          };
+        default:
+          return { image: 'none', size: 'auto' };
+      }
+    }
+
+    const THEMES = [
+      { key: 'primary', label: 'ابتدائي مرح', group: 'حسب المرحلة', bg: '#FFFDF6', text: '#2C3E50', bc: '#FB8C00', bs: 'solid', bw: '5px', pattern: 'dots', divider: 'stars', q: '#FFF3E0', a: '#FFFFFF' },
+      { key: 'middle', label: 'متوسط هادئ', group: 'حسب المرحلة', bg: '#FFFFFF', text: '#263238', bc: '#2E7D32', bs: 'double', bw: '3px', pattern: 'none', divider: 'dashed', q: '#FFFFFF', a: '#FFFFFF' },
+      { key: 'prep', label: 'إعدادي رسمي', group: 'حسب المرحلة', bg: '#FFFFFF', text: '#000000', bc: '#000000', bs: 'double', bw: '3px', pattern: 'none', divider: 'solid', q: '#FFFFFF', a: '#FFFFFF' },
+      { key: 'islamic', label: 'تربية إسلامية', group: 'حسب المادة', bg: '#FBFBF2', text: '#1B5E20', bc: '#2E7D32', bs: 'double', bw: '3px', pattern: 'islamic1', divider: 'floral', q: '#F1F8E9', a: '#FFFFFF' },
+      { key: 'arabic', label: 'لغة عربية', group: 'حسب المادة', bg: '#FFFEFB', text: '#3E2723', bc: '#8D6E63', bs: 'solid', bw: '3px', pattern: 'andalusi', divider: 'dashed', q: '#FFF8E1', a: '#FFFFFF' },
+      { key: 'english', label: 'لغة إنكليزية', group: 'حسب المادة', bg: '#FFFFFF', text: '#1A237E', bc: '#3F51B5', bs: 'solid', bw: '2px', pattern: 'none', divider: 'dotted', q: '#FFFFFF', a: '#FFFFFF' },
+      { key: 'math', label: 'رياضيات', group: 'حسب المادة', bg: '#FFFFFF', text: '#0D47A1', bc: '#1976D2', bs: 'solid', bw: '2px', pattern: 'grid', divider: 'dashed', q: '#E3F2FD', a: '#FFFFFF' },
+      { key: 'science', label: 'علوم', group: 'حسب المادة', bg: '#F7FCFF', text: '#004D40', bc: '#00897B', bs: 'solid', bw: '3px', pattern: 'diagonal', divider: 'solid', q: '#E0F2F1', a: '#FFFFFF' },
+      { key: 'social', label: 'اجتماعيات', group: 'حسب المادة', bg: '#FFFBF5', text: '#4E342E', bc: '#A1887F', bs: 'solid', bw: '3px', pattern: 'dots', divider: 'dashed', q: '#FBE9E7', a: '#FFFFFF' },
+      { key: 'royal', label: 'ملكي فخم', group: 'فخامة', bg: '#FFFEF7', text: '#3E2723', bc: '#B8860B', bs: 'double', bw: '5px', pattern: 'andalusi', divider: 'floral', q: '#FFF8DC', a: '#FFFFFF' },
+      { key: 'minimal', label: 'بسيط جداً', group: 'فخامة', bg: '#FFFFFF', text: '#111111', bc: '#999999', bs: 'none', bw: '1px', pattern: 'none', divider: 'none', q: '#FFFFFF', a: '#FFFFFF' }
+    ];
+
+    function highlightTheme(key) {
+      document.querySelectorAll('.theme-tile').forEach(function(el) {
+        el.classList.toggle('active', el.dataset.key === key);
+      });
+      selectedTheme = key || '';
+    }
+
+    function buildThemeGallery() {
+      const wrap = document.getElementById('theme-gallery');
+      if (!wrap) return;
+      wrap.innerHTML = '';
+      THEMES.forEach(function(t) {
+        const pcss = getPatternCSS(t.pattern, t.text);
+        const tile = document.createElement('div');
+        tile.className = 'theme-tile';
+        tile.dataset.key = t.key;
+        tile.title = t.label + ' — ' + t.group;
+
+        const prev = document.createElement('div');
+        prev.className = 'tt-preview';
+        prev.style.backgroundColor = t.bg;
+        prev.style.backgroundImage = pcss.image;
+        prev.style.backgroundSize = pcss.size;
+        prev.style.border = (t.bs === 'none') ? 'none' : (Math.min(parseInt(t.bw, 10), 3) + 'px ' + t.bs + ' ' + t.bc);
+
+        [55, 80, 40].forEach(function(w) {
+          const ln = document.createElement('div');
+          ln.className = 'tt-line';
+          ln.style.width = w + '%';
+          ln.style.background = t.text;
+          prev.appendChild(ln);
+        });
+
+        const name = document.createElement('div');
+        name.className = 'tt-name';
+        name.textContent = t.label;
+
+        tile.appendChild(prev);
+        tile.appendChild(name);
+        tile.addEventListener('click', function() { applyTheme(t.key); });
+        wrap.appendChild(tile);
+      });
+    }
+
+    function applyTheme(key) {
+      const t = THEMES.filter(function(x) { return x.key === key; })[0];
+      if (!t) return;
+      document.getElementById('bgColor').value = t.bg;
+      document.getElementById('textColor').value = t.text;
+      document.getElementById('borderColor').value = t.bc;
+      document.getElementById('borderStyle').value = t.bs;
+      document.getElementById('borderWidth').value = t.bw;
+      document.getElementById('bgPattern').value = t.pattern;
+      document.getElementById('dividerStyle').value = t.divider;
+      document.getElementById('qColor').value = t.q;
+      document.getElementById('aColor').value = t.a;
+
+      highlightTheme(key);
+      const hint = document.getElementById('themeHint');
+      if (hint) hint.textContent = '✔ طُبّق نمط: ' + t.label;
+      scheduleSave();
+    }
+
+    function clearThemeSelection() {
+      highlightTheme('');
+      const hint = document.getElementById('themeHint');
+      if (hint) hint.textContent = 'تحكّم يدوي بالألوان والإطار والنقش';
+    }
+
+    // اقتراح تلقائي حسب اسم المادة، وإذا ما طابقت نختار حسب المرحلة
+    function autoThemeBySubject() {
+      const txt = (document.getElementById('subject').value + ' ' + document.getElementById('grade').value + ' ' +
+                   document.getElementById('examType').value).toLowerCase();
+      const hint = document.getElementById('themeHint');
+
+      if (!txt.trim()) {
+        if (hint) hint.textContent = '⚠️ اكتب اسم المادة أو الصف أولاً';
+        return;
+      }
+
+      let key = null;
+      if (/(إسلام|اسلام|قرآن|قران|دين|فقه|توحيد|حديث|تفسير)/.test(txt)) key = 'islamic';
+      else if (/(رياض|حساب|جبر|هندسة|هندسه|إحصاء|احصاء|تفاضل)/.test(txt)) key = 'math';
+      else if (/(علوم|فيزياء|كيمياء|أحياء|احياء|علم)/.test(txt)) key = 'science';
+      else if (/(إنكليز|انكليز|إنجليز|انجليز|english)/.test(txt)) key = 'english';
+      else if (/(عربي|عربية|قواعد|أدب|ادب|نحو|بلاغة|بلاغه|إملاء|املاء|مطالعة)/.test(txt)) key = 'arabic';
+      else if (/(اجتماع|تاريخ|جغراف|وطنية|وطنيه)/.test(txt)) key = 'social';
+
+      if (!key) {
+        if (/ابتدائ/.test(txt)) key = 'primary';
+        else if (/متوسط/.test(txt)) key = 'middle';
+        else if (/(إعداد|اعداد)/.test(txt)) key = 'prep';
+        else key = 'middle';
+      }
+
+      applyTheme(key);
+      const t = THEMES.filter(function(x) { return x.key === key; })[0];
+      if (hint) hint.textContent = '✔ اقترحنا نمط: ' + t.label + ' — تقدر تغيّره بأي وقت';
+    }
+
     function preparePaper(isAnswerKey) {
       let pSize = document.getElementById('paperSize').value;
       let subjectType = document.getElementById('subjectType').value;
@@ -562,23 +799,9 @@
       preview.style.backgroundColor = document.getElementById('bgColor').value;
       
       let pattern = document.getElementById('bgPattern').value;
-      let pColor = document.getElementById('textColor').value.replace('#', '%23');
-      
-      if(pattern === 'islamic1') {
-         preview.style.backgroundImage = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='" + pColor + "' fill-opacity='0.05'%3E%3Cpath d='M0 0h40v40H0V0zm40 40h40v40H40V40zm0-40h2l-2 2h-2l2-2zm0 40h2l-2 2h-2l2-2zM0 40h2l-2 2h-2l2-2zm40-40H20v20h20V0zm0 40H20v20h20V40zm20 20v-20h20v20H60zm-40-40v-20h20v20H20zM0 0v20h20V0H0zm40 40v20h20V40H40z'/%3E%3C/g%3E%3C/svg%3E\")";
-         preview.style.backgroundSize = '80px 80px';
-      } else if(pattern === 'andalusi') {
-         preview.style.backgroundImage = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='" + pColor + "' fill-opacity='0.04'%3E%3Cpath d='M30 60L0 30 30 0l30 30-30 30zm0-10l20-20-20-20-20 20 20 20z'/%3E%3C/g%3E%3C/svg%3E\")";
-         preview.style.backgroundSize = '60px 60px';
-      } else if(pattern === 'diagonal') {
-         preview.style.backgroundImage = 'repeating-linear-gradient(45deg, transparent, transparent 10px, ' + document.getElementById('textColor').value + '08 10px, ' + document.getElementById('textColor').value + '08 11px)';
-         preview.style.backgroundSize = '100% 100%';
-      } else if(pattern === 'radial') {
-         preview.style.backgroundImage = 'radial-gradient(circle at center, ' + document.getElementById('textColor').value + '08 0%, transparent 70%)';
-         preview.style.backgroundSize = '100% 100%';
-      } else {
-         preview.style.backgroundImage = 'none';
-      }
+      let pcss = getPatternCSS(pattern, document.getElementById('textColor').value);
+      preview.style.backgroundImage = pcss.image;
+      preview.style.backgroundSize = pcss.size;
       
       let bStyle = document.getElementById('borderStyle').value;
       let bWidth = document.getElementById('borderWidth').value;
@@ -607,8 +830,9 @@
 
       document.getElementById('pv-basmala').style.display = (document.getElementById('basmala').value === 'yes') ? 'block' : 'none';
       
-      let dirVal = document.getElementById('directorate').value;
-      if(dirVal) {
+      let dirVal = document.getElementById('directorate').value.trim();
+      let showDir = document.getElementById('showDirectorate').checked;
+      if(dirVal && showDir) {
           document.getElementById('pv-directorate').style.display = 'inline';
           document.getElementById('pv-directorate').innerText = dirVal;
           document.getElementById('pv-dir-br').style.display = 'inline';
@@ -624,7 +848,7 @@
           let wmText = document.getElementById('watermarkText').value;
           if(wmText) {
               watermarkElem.style.display = 'flex';
-              watermarkElem.innerHTML = wmText;
+              watermarkElem.textContent = wmText;
               watermarkElem.style.transform = 'translate(-50%, -50%) rotate(-45deg)';
           } else {
               watermarkElem.style.display = 'none';
@@ -784,50 +1008,128 @@
     // ═══════════════════════════════════════════
     // 💾 نظام الحفظ التلقائي
     // ═══════════════════════════════════════════
-    function saveToLocal() {
-      try {
-        const data = {
-          questionsHTML: document.getElementById('q-container').innerHTML,
-          count: count,
-          paperSize: document.getElementById('paperSize').value,
-          subjectType: document.getElementById('subjectType').value,
-          paperMode: document.getElementById('paperMode').value,
-          showAnswersMode: document.getElementById('showAnswersMode').value,
-          fontSize: document.getElementById('fontSize').value,
-          dividerStyle: document.getElementById('dividerStyle').value,
-          borderStyle: document.getElementById('borderStyle').value,
-          borderWidth: document.getElementById('borderWidth').value,
-          borderColor: document.getElementById('borderColor').value,
-          textColor: document.getElementById('textColor').value,
-          bgColor: document.getElementById('bgColor').value,
-          bgPattern: document.getElementById('bgPattern').value,
-          qColor: document.getElementById('qColor').value,
-          aColor: document.getElementById('aColor').value,
-          watermarkType: document.getElementById('watermarkType').value,
-          watermarkText: document.getElementById('watermarkText').value,
-          basmala: document.getElementById('basmala').value,
-          directorate: document.getElementById('directorate').value,
-          school: document.getElementById('school').value,
-          examType: document.getElementById('examType').value,
-          subject: document.getElementById('subject').value,
-          grade: document.getElementById('grade').value,
-          year: document.getElementById('year').value,
-          examDate: document.getElementById('examDate').value,
-          examTime: document.getElementById('examTime').value,
-          teacherTitle: document.getElementById('teacherTitle').value,
-          teacherName: document.getElementById('teacherName').value,
-          examNote: document.getElementById('examNote').value,
-          savedAt: new Date().toISOString()
+    const STORAGE_KEY = 'examMakerData';
+
+    // ── أدوات قراءة وكتابة قيم الحقول ──
+    function readVal(root, sel) {
+      const el = root.querySelector(sel);
+      return el ? el.value : '';
+    }
+    function setVal(root, sel, v) {
+      const el = root.querySelector(sel);
+      if (el && v !== undefined && v !== null) el.value = v;
+    }
+
+    // جمع الأسئلة والفروع كنموذج بيانات (JSON)
+    // ⚠️ لا نستخدم innerHTML أبداً: قيم الـ textarea لا تظهر فيه، فكانت النصوص تضيع
+    function collectQuestions() {
+      return Array.from(document.querySelectorAll('#q-container .question-block')).map(function(block) {
+        return {
+          title: readVal(block, '.q-title'),
+          marks: readVal(block, '.q-marks'),
+          text: readVal(block, '.q-text'),
+          answer: readVal(block, '.q-answer'),
+          branches: Array.from(block.querySelectorAll('.b-block')).map(function(b) {
+            return {
+              title: readVal(b, '.b-title'),
+              marks: readVal(b, '.b-marks'),
+              text: readVal(b, '.b-text'),
+              answer: readVal(b, '.b-answer')
+            };
+          })
         };
-        localStorage.setItem('examMakerData', JSON.stringify(data));
-        
-        const toast = document.getElementById('toast');
-        if (toast) {
-          toast.classList.add('show');
-          setTimeout(() => toast.classList.remove('show'), 1500);
+      });
+    }
+
+    // إعادة بناء الأسئلة من نموذج البيانات
+    function restoreQuestions(list) {
+      const qc = document.getElementById('q-container');
+      qc.innerHTML = '';
+      count = 0;
+      (list || []).forEach(function(q) {
+        const block = addQ();
+        setVal(block, '.q-title', q.title);
+        setVal(block, '.q-marks', q.marks);
+        setVal(block, '.q-text', q.text);
+        setVal(block, '.q-answer', q.answer);
+        const bContainer = block.querySelector('.branches-container');
+        (q.branches || []).forEach(function(b) {
+          const el = addBranchTo(bContainer);
+          setVal(el, '.b-title', b.title);
+          setVal(el, '.b-marks', b.marks);
+          setVal(el, '.b-text', b.text);
+          setVal(el, '.b-answer', b.answer);
+        });
+        updateBranches(bContainer);
+      });
+      renumberQuestions();
+    }
+
+    // إشعار موحّد (أخضر للنجاح، أحمر للخطأ)
+    function showToast(msg, isError) {
+      const toast = document.getElementById('toast');
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.style.background = isError ? '#e53935' : '#2e7d32';
+      toast.classList.add('show');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(function() { toast.classList.remove('show'); }, isError ? 4500 : 1500);
+    }
+
+    function saveToLocal() {
+      const data = {
+        dataVersion: 2,
+        questions: collectQuestions(),
+        count: count,
+        watermarkImage: uploadedWatermarkImage,
+        paperSize: document.getElementById('paperSize').value,
+        subjectType: document.getElementById('subjectType').value,
+        paperMode: document.getElementById('paperMode').value,
+        showAnswersMode: document.getElementById('showAnswersMode').value,
+        fontSize: document.getElementById('fontSize').value,
+        dividerStyle: document.getElementById('dividerStyle').value,
+        borderStyle: document.getElementById('borderStyle').value,
+        borderWidth: document.getElementById('borderWidth').value,
+        borderColor: document.getElementById('borderColor').value,
+        textColor: document.getElementById('textColor').value,
+        bgColor: document.getElementById('bgColor').value,
+        bgPattern: document.getElementById('bgPattern').value,
+        qColor: document.getElementById('qColor').value,
+        aColor: document.getElementById('aColor').value,
+        themeKey: selectedTheme,
+        watermarkType: document.getElementById('watermarkType').value,
+        watermarkText: document.getElementById('watermarkText').value,
+        basmala: document.getElementById('basmala').value,
+        directorate: document.getElementById('directorate').value,
+        showDirectorate: document.getElementById('showDirectorate').checked,
+        school: document.getElementById('school').value,
+        examType: document.getElementById('examType').value,
+        subject: document.getElementById('subject').value,
+        grade: document.getElementById('grade').value,
+        year: document.getElementById('year').value,
+        examDate: document.getElementById('examDate').value,
+        examTime: document.getElementById('examTime').value,
+        teacherTitle: document.getElementById('teacherTitle').value,
+        teacherName: document.getElementById('teacherName').value,
+        examNote: document.getElementById('examNote').value,
+        savedAt: new Date().toISOString()
+      };
+
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        showToast('✓ تم الحفظ تلقائياً');
+      } catch (err) {
+        // المساحة ممتلئة؟ نحفظ بدون الصورة بدل ما نضيّع كل شي
+        if (data.watermarkImage) {
+          try {
+            const withoutImage = Object.assign({}, data, { watermarkImage: null });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(withoutImage));
+            showToast('⚠️ حفظنا الشغل بدون صورة العلامة المائية (المساحة ممتلئة)', true);
+            return;
+          } catch (e2) { /* نكمل للرسالة العامة */ }
         }
-      } catch (e) {
-        console.warn('فشل الحفظ:', e);
+        showToast('⚠️ تعذّر الحفظ — مساحة التخزين ممتلئة', true);
+        console.warn('فشل الحفظ:', err);
       }
     }
 
@@ -840,10 +1142,7 @@
         }
         const data = JSON.parse(raw);
 
-        if (data.questionsHTML) {
-          document.getElementById('q-container').innerHTML = data.questionsHTML;
-          count = data.count || 0;
-        }
+        // 1) الإعدادات أولاً — لأن بناء الأسئلة يعتمد على النمط المختار
         if (data.paperSize) document.getElementById('paperSize').value = data.paperSize;
         if (data.subjectType) document.getElementById('subjectType').value = data.subjectType;
         if (data.paperMode) document.getElementById('paperMode').value = data.paperMode;
@@ -862,6 +1161,7 @@
         if (data.watermarkText) document.getElementById('watermarkText').value = data.watermarkText;
         if (data.basmala) document.getElementById('basmala').value = data.basmala;
         if (data.directorate) document.getElementById('directorate').value = data.directorate;
+        if (typeof data.showDirectorate === 'boolean') document.getElementById('showDirectorate').checked = data.showDirectorate;
         if (data.school) document.getElementById('school').value = data.school;
         if (data.examType) document.getElementById('examType').value = data.examType;
         if (data.subject) document.getElementById('subject').value = data.subject;
@@ -872,6 +1172,22 @@
         if (data.teacherTitle) document.getElementById('teacherTitle').value = data.teacherTitle;
         if (data.teacherName) document.getElementById('teacherName').value = data.teacherName;
         if (data.examNote) document.getElementById('examNote').value = data.examNote;
+
+        // 2) صورة العلامة المائية
+        uploadedWatermarkImage = data.watermarkImage || null;
+
+        // 2.5) النمط المختار
+        highlightTheme(data.themeKey || '');
+
+        // 3) الأسئلة والفروع
+        if (Array.isArray(data.questions)) {
+          restoreQuestions(data.questions);
+        } else if (data.questionsHTML) {
+          // توافق مع البيانات القديمة: الهيكل فقط (نصوص الأسئلة ما كانت تُحفظ أصلاً)
+          document.getElementById('q-container').innerHTML = data.questionsHTML;
+          count = data.count || 0;
+          console.warn('⚠️ بيانات بنسخة قديمة — النصوص غير محفوظة');
+        }
 
         toggleMathToolbar();
         toggleAnswerFields();
@@ -896,7 +1212,7 @@
 
     function clearAll() {
       if (confirm('هل أنت متأكد؟ سيتم مسح كل البيانات والأسئلة نهائياً.')) {
-        localStorage.removeItem('examMakerData');
+        localStorage.removeItem(STORAGE_KEY);
         location.reload();
       }
     }
@@ -979,6 +1295,7 @@
     // ═══════════════════════════════════════════
     // 🚀 التهيئة
     // ═══════════════════════════════════════════
+    buildThemeGallery();
     if (!loadFromLocal()) {
       addQ();
     }
