@@ -52,13 +52,12 @@
     
     @media print {
       @page { margin: 0; }
-      @page duo { size: A4 landscape; margin: 0; }
       body { background-color: #fff; padding: 0; margin: 0; }
       body * { visibility: hidden; }
       #editor-ui, #updateBanner, #toast { display: none !important; }
       #paper-preview, #paper-preview * { visibility: visible; }
-      #paper-preview { display: flex !important; position: absolute; left: 0; top: 0; margin: 0 !important; }
-      #paper-preview.duo { page: duo; width: 297mm; flex-direction: row; }
+      #paper-preview { display: flex !important; position: absolute !important; right: 0; top: 0; left: auto; margin: 0 !important; }
+      #paper-preview.duo { width: 297mm; flex-direction: row; }
       #paper-preview.single { width: 210mm; flex-direction: column; }
       .sheet-A4 { min-height: 295mm; }
       * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
@@ -112,6 +111,7 @@
       body { padding: 8px; }
     }
   </style>
+  <style id="page-orientation">@page { size: A4 portrait; margin: 0; }</style>
 </head>
 <body>
   <div class="container">
@@ -1010,6 +1010,13 @@
       const isA5 = document.getElementById('paperSize').value === 'A5';
       const preview = document.getElementById('paper-preview');
       preview.className = isA5 ? 'duo' : 'single';
+
+      // اتجاه الصفحة عند الطباعة: A5 (نموذجين جنب بعض) = عرضي، A4 = طولي
+      const orient = document.getElementById('page-orientation');
+      if (orient) {
+        orient.textContent = '@page { size: A4 ' + (isA5 ? 'landscape' : 'portrait') + '; margin: 0; }';
+      }
+
       // A5: نصف الورقة للنموذج «أ» والنصف الثاني للنموذج «ب» — وكل واحد يبدأ من س1
       preview.innerHTML = isA5
         ? buildSheetHTML(isAnswerKey, true, 'a') + buildSheetHTML(isAnswerKey, true, 'b')
