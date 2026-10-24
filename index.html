@@ -32,7 +32,7 @@
     /* 📄 حاوية الورقة: نسخة A4 واحدة، أو نسختين A5 على ورقة A4 */
     #paper-preview { display: none; margin: 20px auto; }
     #paper-preview.single { flex-direction: column; width: 210mm; }
-    #paper-preview.duo { flex-direction: row; width: 297mm; }
+    #paper-preview.duo { flex-direction: column; width: 210mm; }
 
     .sheet {
       position: relative; overflow: hidden; display: flex; flex-direction: column;
@@ -40,7 +40,7 @@
       background-size: auto; background-repeat: repeat; background-position: center;
     }
     .sheet-A4 { width: 210mm; min-height: 297mm; padding: 30px; }
-    .sheet-A5 { width: 148mm; height: 210mm; padding: 16px; }
+    .sheet-A5 { width: 210mm; height: 147.5mm; padding: 14px; }
     .sheet-inner { position: relative; z-index: 1; display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
     .sheet-footer { margin-top: auto; padding-top: 10px; display: flex; justify-content: space-between; align-items: flex-end; font-weight: bold; width: 100%; }
     .sheet-credit { text-align: center; font-size: 0.7em; opacity: 0.5; margin-top: 15px; padding-top: 8px; border-top: 1px dashed currentColor; }
@@ -57,7 +57,7 @@
       #editor-ui, #updateBanner, #toast { display: none !important; }
       #paper-preview, #paper-preview * { visibility: visible; }
       #paper-preview { display: flex !important; position: absolute !important; right: 0; top: 0; left: auto; margin: 0 !important; }
-      #paper-preview.duo { width: 297mm; flex-direction: row; }
+      #paper-preview.duo { width: 210mm; flex-direction: column; }
       #paper-preview.single { width: 210mm; flex-direction: column; }
       .sheet-A4 { min-height: 295mm; }
       * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
@@ -1011,21 +1011,29 @@
       const preview = document.getElementById('paper-preview');
       preview.className = isA5 ? 'duo' : 'single';
 
-      // اتجاه الصفحة عند الطباعة: A5 (نموذجين جنب بعض) = عرضي، A4 = طولي
-      const orient = document.getElementById('page-orientation');
-      if (orient) {
-        orient.textContent = '@page { size: A4 ' + (isA5 ? 'landscape' : 'portrait') + '; margin: 0; }';
-      }
-
-      // A5: نصف الورقة للنموذج «أ» والنصف الثاني للنموذج «ب» — وكل واحد يبدأ من س1
+      // A5: ورقة A4 طولية مقسومة أفقياً — النصف الأعلى «أ» والأسفل «ب»، وكل واحد يبدأ من س1
       preview.innerHTML = isA5
         ? buildSheetHTML(isAnswerKey, true, 'a') + buildSheetHTML(isAnswerKey, true, 'b')
         : buildSheetHTML(isAnswerKey, false, 'a');
     }
 
+    // تحذير إذا كان محتوى أحد النموذجين أطول من نصف الورقة
+    function checkSheetOverflow() {
+      if (document.getElementById('paperSize').value !== 'A5') return;
+      const sheets = document.querySelectorAll('#paper-preview .sheet');
+      const over = [];
+      sheets.forEach(function(s, i) {
+        if (s.scrollHeight > s.clientHeight + 2) over.push(i === 0 ? 'أ' : 'ب');
+      });
+      if (over.length) {
+        showToast('⚠️ محتوى النموذج (' + over.join(' و ') + ') أطول من نصف الورقة — قلّل الأسئلة أو صغّر الخط', true);
+      }
+    }
+
     function printPaper(isAnswerKey) {
       preparePaper(isAnswerKey);
       document.getElementById('paper-preview').style.display = 'flex';
+      checkSheetOverflow();
       window.print();
       setTimeout(() => {
         if (document.getElementById('paper-preview').style.display === 'flex') {
