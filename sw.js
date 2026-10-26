@@ -1,4 +1,4 @@
-const CACHE_NAME = 'exam-maker-v8.3';  // ⬅️ رقم مهم! كل تحديث غيّره
+const CACHE_NAME = 'exam-maker-v8.4';  // ⬅️ رقم مهم! كل تحديث غيّره
 const urlsToCache = [
   './',
   './index.html',
