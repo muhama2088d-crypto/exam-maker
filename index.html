@@ -43,7 +43,6 @@
     .sheet-A5 { width: 210mm; height: 147.5mm; padding: 14px; }
     .sheet-inner { position: relative; z-index: 1; display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
     .sheet-footer { margin-top: auto; padding-top: 10px; display: flex; justify-content: space-between; align-items: flex-end; font-weight: bold; width: 100%; }
-    .sheet-credit { text-align: center; font-size: 0.7em; opacity: 0.5; margin-top: 15px; padding-top: 8px; border-top: 1px dashed currentColor; }
     .pv-basmala { text-align: center; font-weight: bold; font-size: 1em; margin-bottom: 5px; }
 
     .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 80px; color: rgba(0,0,0,0.06); white-space: nowrap; pointer-events: none; z-index: 0; font-weight: bold; display: none; align-items: center; justify-content: center; width: 100%; height: 100%; }
@@ -862,7 +861,7 @@
       const color = colorEl ? colorEl.value : '#1565c0';
       const marksHtml = marks ? ' <span style="font-size: 0.82em; font-weight: normal;">(' + escHtml(marks) + ')</span>' : '';
       return '<div class="paper-section" style="text-align: center; margin: 18px 0 10px; color: ' + color +
-             '; font-weight: bold; font-size: 1.05em; text-decoration: underline; text-underline-offset: 3px;">' +
+             '; font-weight: bold; font-size: 1.05em;">' +
              escHtml(title) + marksHtml + '</div>';
     }
 
@@ -898,7 +897,7 @@
             const marks = (node.querySelector('.s-marks').value || '').trim();
             const colorEl = node.querySelector('.s-color');
             const color = colorEl ? colorEl.value : '#1565c0';
-            tableHTML += "<tr><td colspan='2' style='text-align: center; background-color: " + qColor + "; color: " + color + "; font-weight: bold; text-decoration: underline;'>" +
+            tableHTML += "<tr><td colspan='2' style='text-align: center; background-color: " + qColor + "; color: " + color + "; font-weight: bold;'>" +
               escHtml(title) + (marks ? ' (' + escHtml(marks) + ')' : '') + "</td></tr>";
             return;
           }
@@ -1080,8 +1079,7 @@
           '<div style="width: 25%; text-align: left;">' + escHtml(v('teacherTitle')) +
             '<div style="margin-top: 5px;">' + escHtml(v('teacherName')) + '</div>' +
           '</div>' +
-        '</div>' +
-        '<div class="sheet-credit">تم الإنشاء بواسطة أداة صانع الأسئلة - تطوير: محمد باقر (قناة تبسيط التقنية)</div>';
+        '</div>';
 
       return '<div class="' + sheetClass + '" style="' + sheetStyle + '">' +
         watermarkHtml +
