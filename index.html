@@ -342,7 +342,10 @@
           </div>
           <div id="q-container-a" class="q-container"></div>
           <div id="q-container-b" class="q-container" style="display: none;"></div>
-          <button class="btn btn-primary" onclick="addQ()">➕ إضافة سؤال جديد</button>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn btn-primary" onclick="addQ()">➕ إضافة سؤال جديد</button>
+            <button class="btn" style="background: #1565c0; color: #fff;" onclick="addSection()">📑 إضافة عنوان قسم</button>
+          </div>
         </div>
         
         <div class="card" style="border: 2px solid #2e7d32; background: #f4fdf7;">
@@ -510,6 +513,31 @@
         if (b.querySelectorAll('.question-block').length === 0) addQ(b);   // نجهّز نموذج ب
       }
       applyVariantUI();
+      scheduleSave();
+    }
+
+    // عنوان قسم (مثل: القرآن الكريم / المعاني والتفسير)
+    function addSection(container) {
+      const qc = container || activeQContainer();
+      const div = document.createElement('div');
+      div.className = 'section-block';
+      div.style.cssText = 'border: 2px dashed #90caf9; background: #e3f2fd; border-radius: 8px; padding: 10px; margin-bottom: 12px;';
+      div.innerHTML =
+        "<div style='display: flex; gap: 6px; align-items: center; flex-wrap: wrap;'>" +
+          "<strong style='color: #1565c0;'>📑 عنوان قسم</strong>" +
+          "<input type='text' class='s-title' placeholder='مثلاً: القرآن الكريم' style='flex: 1; min-width: 150px; padding: 6px; font-size: 13px; border-color: #1565c0;'>" +
+          "<input type='text' class='s-marks' placeholder='الدرجة' style='width: 90px; padding: 6px; font-size: 13px;'>" +
+          "<input type='color' class='s-color' value='#1565c0' title='لون العنوان' style='width: 42px; height: 34px; padding: 0; border: none; border-radius: 4px; cursor: pointer;'>" +
+          "<button type='button' class='btn btn-danger' style='padding: 4px 8px; font-size: 12px;' onclick='deleteSection(this)'>حذف</button>" +
+        "</div>";
+      qc.appendChild(div);
+      scheduleSave();
+      return div;
+    }
+
+    function deleteSection(btn) {
+      const sec = btn.closest('.section-block');
+      if (sec) sec.remove();
       scheduleSave();
     }
 
@@ -818,24 +846,44 @@
     }
 
     // يحبك الأسئلة والفروع — الترقيم يبدأ دائماً من س1
-    // الحصول على الأسئلة الفعّالة (غير الفارغة) لنموذج معيّن
-    function getValidBlocks(variant) {
-      const qRoot = document.getElementById('q-container-' + (variant || 'a'));
-      if (!qRoot) return [];
-      return Array.from(qRoot.querySelectorAll('.question-block')).filter(function(b) {
-        return b.querySelector('.q-text').value.trim() !== "" ||
-               b.querySelector('.q-title').value.trim() !== "" ||
-               b.querySelectorAll('.b-block').length > 0;
-      });
+    // هل السؤال يحتوي محتوى فعلي؟
+    function isQuestionFilled(node) {
+      return node.querySelector('.q-text').value.trim() !== "" ||
+             node.querySelector('.q-title').value.trim() !== "" ||
+             node.querySelectorAll('.b-block').length > 0;
     }
 
+    // ترويسة قسم مطبوعة (عنوان مثل: القرآن الكريم)
+    function buildSectionHTML(node) {
+      const title = (node.querySelector('.s-title').value || '').trim();
+      if (!title) return '';
+      const marks = (node.querySelector('.s-marks').value || '').trim();
+      const colorEl = node.querySelector('.s-color');
+      const color = colorEl ? colorEl.value : '#1565c0';
+      const marksHtml = marks ? ' <span style="font-size: 0.82em; font-weight: normal;">(' + escHtml(marks) + ')</span>' : '';
+      return '<div class="paper-section" style="text-align: center; margin: 18px 0 10px; color: ' + color +
+             '; font-weight: bold; font-size: 1.05em; text-decoration: underline; text-underline-offset: 3px;">' +
+             escHtml(title) + marksHtml + '</div>';
+    }
+
+    // يحبك الأسئلة والفروع والأقسام — الترقيم يبدأ من س1 ويكمل عبر الأقسام
     function buildQuestionsHTML(isAnswerKey, isEnglish, paperMode, divStyle, variant) {
       let pq = "";
-      const validBlocks = getValidBlocks(variant);
+      const qRoot = document.getElementById('q-container-' + (variant || 'a'));
+      if (!qRoot) return '';
 
       const alphabet = isEnglish ? ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] : ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح', 'ط', 'ي'];
       const padSide = isEnglish ? "padding-left" : "padding-right";
       const floatSide = isEnglish ? "right" : "left";
+
+      // العناصر التي ستُطبع فعلاً: أقسام لها عنوان + أسئلة غير فارغة
+      const items = Array.from(qRoot.children).filter(function(n) {
+        if (n.classList.contains('section-block')) return (n.querySelector('.s-title').value || '').trim() !== '';
+        if (n.classList.contains('question-block')) return isQuestionFilled(n);
+        return false;
+      });
+
+      let qIndex = 0;
 
       if (paperMode === 'table') {
         const qColor = document.getElementById('qColor').value;
@@ -844,14 +892,26 @@
         const thA = isEnglish ? "Answer" : "الجواب";
         let tableHTML = "<table class='exam-table'><tr><th style='width: 50%; text-align: center; background-color: " + qColor + ";'>" + thQ + "</th><th style='width: 50%; text-align: center; background-color: " + aColor + ";'>" + thA + "</th></tr>";
 
-        validBlocks.forEach(function(b, i) {
+        items.forEach(function(node) {
+          if (node.classList.contains('section-block')) {
+            const title = node.querySelector('.s-title').value.trim();
+            const marks = (node.querySelector('.s-marks').value || '').trim();
+            const colorEl = node.querySelector('.s-color');
+            const color = colorEl ? colorEl.value : '#1565c0';
+            tableHTML += "<tr><td colspan='2' style='text-align: center; background-color: " + qColor + "; color: " + color + "; font-weight: bold; text-decoration: underline;'>" +
+              escHtml(title) + (marks ? ' (' + escHtml(marks) + ')' : '') + "</td></tr>";
+            return;
+          }
+
+          qIndex++;
+          const b = node;
           const qTitle = b.querySelector('.q-title').value.trim();
           const qText = escBr(b.querySelector('.q-text').value);
           const qAnswerEl = b.querySelector('.q-answer');
           const qAnswerVal = qAnswerEl ? escBr(qAnswerEl.value) : "";
           const qMarksEl = b.querySelector('.q-marks');
           const qMarks = qMarksEl ? qMarksEl.value.trim() : "";
-          const qLabel = isEnglish ? "Q" + (i + 1) + ". " : "س" + (i + 1) + ": ";
+          const qLabel = isEnglish ? "Q" + qIndex + ". " : "س" + qIndex + ": ";
           const qMarksHtml = qMarks ? " <span style='color: inherit; font-size: 0.9em; opacity: 0.8; white-space: nowrap;'>(" + escHtml(qMarks) + ")</span>" : "";
           const finalTableAnswer = isAnswerKey ? qAnswerVal : "";
 
@@ -862,7 +922,15 @@
         return tableHTML + "</table>";
       }
 
-      validBlocks.forEach(function(b, i) {
+      items.forEach(function(node, idx) {
+        if (node.classList.contains('section-block')) {
+          pq += buildSectionHTML(node);
+          return;
+        }
+
+        const b = node;
+        qIndex++;
+
         const qTitle = b.querySelector('.q-title').value.trim();
         const qText = escBr(b.querySelector('.q-text').value);
         const qMarksEl = b.querySelector('.q-marks');
@@ -870,11 +938,12 @@
         const qAnswerEl = b.querySelector('.q-answer');
         const qAnswerVal = qAnswerEl ? escBr(qAnswerEl.value) : "";
 
-        const qLabel = isEnglish ? "Q" + (i + 1) + ". " : "س" + (i + 1) + ": ";
+        const qLabel = isEnglish ? "Q" + qIndex + ". " : "س" + qIndex + ": ";
 
         let borderStyle = "";
         let customDivider = "";
-        if (i < validBlocks.length - 1) {
+        const next = items[idx + 1];
+        if (next && next.classList.contains('question-block')) {
           if (divStyle === 'dashed') borderStyle = "border-bottom: 2px dashed currentColor;";
           else if (divStyle === 'solid') borderStyle = "border-bottom: 2px solid currentColor;";
           else if (divStyle === 'dotted') borderStyle = "border-bottom: 2px dotted currentColor;";
@@ -1101,17 +1170,27 @@
       if (el && v !== undefined && v !== null) el.value = v;
     }
 
-    // جمع أسئلة نموذج واحد (أ أو ب)
+    // جمع عناصر نموذج واحد (أقسام + أسئلة) بالترتيب
     function collectVariant(variant) {
       const qc = document.getElementById('q-container-' + variant);
       if (!qc) return [];
-      return Array.from(qc.querySelectorAll('.question-block')).map(function(block) {
+      return Array.from(qc.children).map(function(node) {
+        if (node.classList.contains('section-block')) {
+          return {
+            type: 'section',
+            title: readVal(node, '.s-title'),
+            marks: readVal(node, '.s-marks'),
+            color: readVal(node, '.s-color')
+          };
+        }
+        if (!node.classList.contains('question-block')) return null;
         return {
-          title: readVal(block, '.q-title'),
-          marks: readVal(block, '.q-marks'),
-          text: readVal(block, '.q-text'),
-          answer: readVal(block, '.q-answer'),
-          branches: Array.from(block.querySelectorAll('.b-block')).map(function(b) {
+          type: 'question',
+          title: readVal(node, '.q-title'),
+          marks: readVal(node, '.q-marks'),
+          text: readVal(node, '.q-text'),
+          answer: readVal(node, '.q-answer'),
+          branches: Array.from(node.querySelectorAll('.b-block')).map(function(b) {
             return {
               title: readVal(b, '.b-title'),
               marks: readVal(b, '.b-marks'),
@@ -1120,7 +1199,7 @@
             };
           })
         };
-      });
+      }).filter(Boolean);
     }
     function collectQuestions() {
       return { a: collectVariant('a'), b: collectVariant('b') };
@@ -1133,6 +1212,13 @@
       if (!qc) return;
       qc.innerHTML = '';
       (list || []).forEach(function(q) {
+        if (q && q.type === 'section') {
+          const sec = addSection(qc);
+          setVal(sec, '.s-title', q.title);
+          setVal(sec, '.s-marks', q.marks);
+          if (q.color) setVal(sec, '.s-color', q.color);
+          return;
+        }
         const block = addQ(qc);
         setVal(block, '.q-title', q.title);
         setVal(block, '.q-marks', q.marks);
