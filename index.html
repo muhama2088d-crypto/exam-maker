@@ -26,6 +26,7 @@
     .btn-danger { background: #e53935; color: #fff; padding: 6px 10px; font-size: 12px; }
     .btn-warning { background: #f39c12; color: #fff; }
     .btn-purple { background: #8e44ad; color: #fff; }
+    .btn-teal { background: #009688; color: #fff; border: none; }
     .toolbar-btn { background: #eee; border: 1px solid #ccc; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer; margin-left: 4px; margin-bottom: 4px; }
     .actions-bar { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
     
@@ -42,7 +43,6 @@
     .exam-table th, .exam-table td { border: 2px solid currentColor; padding: 15px; font-weight: bold; vertical-align: top; }
     
     .size-A4 { width: 210mm; min-height: 297mm; }
-    .size-A5 { width: 148mm; min-height: 210mm; font-size: 90%; }
     
     @media print {
       @page { margin: 0; } 
@@ -52,7 +52,6 @@
       #paper-preview, #paper-preview * { visibility: visible; }
       #paper-preview { display: flex !important; position: absolute; left: 0; top: 0; margin: 0 !important; transform-origin: top center; border: none; outline: none; }
       .size-A4 { width: 210mm; min-height: 295mm; }
-      .size-A5 { width: 148mm; min-height: 208mm; }
       * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     }
     
@@ -107,7 +106,7 @@
               <label>حجم الورقة</label>
               <select id="paperSize">
                 <option value="A4">A4 - ورقة كاملة</option>
-                <option value="A5">A5 - نصف ورقة</option>
+                <option value="A5">A5 - نصف ورقة (استنساخ نموذجين)</option>
               </select>
             </div>
             <div class="form-group">
@@ -292,44 +291,7 @@
     </div>
     
     <div id="paper-preview" class="size-A4">
-      <div id="pv-watermark" class="watermark"></div>
-      <div style="position: relative; z-index: 1; display: flex; flex-direction: column; height: 100%; min-height: 100vh;">
-          
-          <div id="pv-basmala" style="text-align: center; font-weight: bold; font-size: 1em; margin-bottom: 5px; display: none; direction: rtl;">بسم الله الرحمن الرحيم</div>
-          
-          <!-- 🆕 الترويسة المرتبة -->
-          <div class="paper-header">
-            <div class="header-right">
-              جمهورية العراق<br>وزارة التربية<br>
-              <span id="pv-directorate" style="display:none;"></span><br id="pv-dir-br" style="display:none;">
-              المدرسة: <span id="pv-school"></span>
-            </div>
-            <div class="header-center">
-              <div class="exam-type-title" id="pv-type" style="margin-bottom: 5px;"></div>
-              للعام الدراسي <span id="pv-year"></span>
-              <hr style="border: 0; border-top: 1px solid currentColor; margin: 5px 0; opacity: 0.5;">
-            </div>
-            <div class="header-left">
-              المادة: <span id="pv-subject"></span><br>
-              الصف: <span id="pv-grade"></span><br>
-              <span id="pv-date-container" style="display: none;">التاريخ: <span id="pv-date"></span><br></span>
-              <span id="pv-time-container" style="display: none;">الوقت: <span id="pv-time"></span></span>
-            </div>
-          </div>
-          
-          <div id="pv-qs" style="flex-grow: 1;"></div>
-          
-          <div style="margin-top: 30px; padding-top: 10px; display: flex; justify-content: space-between; align-items: flex-end; font-weight: bold; font-size: 1em; direction: rtl; width: 100%;">
-            <div style="width: 25%;"></div>
-            <div style="width: 50%; text-align: center;">
-              <span id="pv-note"></span>
-            </div>
-            <div style="width: 25%; text-align: left;">
-              <div id="pv-teacher-title"></div>
-              <div id="pv-teacher-name" style="margin-top: 5px;"></div>
-            </div>
-          </div>
-      </div>
+      <!-- سيتم تعبئة التصميم برمجياً من دالة الطباعة -->
     </div>
   </div>
 
@@ -381,6 +343,28 @@
         }
     }
 
+    function previewQImage(input) {
+      if (input.files && input.files[0]) {
+        let reader = new FileReader();
+        reader.onload = function(e) {
+          let previewDiv = input.parentElement.querySelector('.q-image-preview');
+          previewDiv.style.display = 'block';
+          previewDiv.querySelector('img').src = e.target.result;
+          scheduleSave();
+        }
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+    
+    function removeQImage(btn) {
+      let previewDiv = btn.closest('.q-image-preview');
+      previewDiv.style.display = 'none';
+      previewDiv.querySelector('img').src = '';
+      let input = previewDiv.parentElement.querySelector('.q-image-input');
+      input.value = '';
+      scheduleSave();
+    }
+
     document.getElementById('watermarkImage').addEventListener('change', function(e) {
         let file = e.target.files[0];
         if(file) {
@@ -398,6 +382,7 @@
       document.getElementById('math-toolbar').style.display = (type === 'math') ? 'block' : 'none';
       let mathBtns = document.querySelectorAll('.math-btn');
       mathBtns.forEach(btn => { btn.style.display = (type === 'math') ? 'inline-block' : 'none'; });
+      document.querySelectorAll('.branches-container').forEach(container => updateBranches(container));
     }
 
     function toggleAnswerFields() {
@@ -430,22 +415,34 @@
         "<div style='flex:1; display:flex; align-items:center; gap: 5px;'>" +
           "<strong style='margin-left: 5px;'>س" + count + "</strong>" +
           "<input type='text' class='q-title' placeholder='صيغة السؤال' style='flex-grow: 1; padding: 6px; font-size: 13px; border-color: red; color: red;'>" +
+          "<input type='text' class='q-marks' placeholder='الدرجة' style='width: 70px; padding: 6px; font-size: 13px;'>" +
         "</div>" +
         "<button type='button' class='btn btn-danger' onclick='deleteQuestion(this)'>حذف</button>" +
       "</div>" +
+      
       "<div style='margin-bottom: 8px;'>" +
         "<button type='button' class='toolbar-btn' onmousedown='event.preventDefault(); insertSym(this, \" .................... \")'>➕ فراغ</button>" +
         "<button type='button' class='toolbar-btn math-btn' style='display: " + mathDisplay + ";' onmousedown='event.preventDefault(); insertSym(this, \" ÷ \")'>÷</button>" +
         "<button type='button' class='toolbar-btn math-btn' style='display: " + mathDisplay + ";' onmousedown='event.preventDefault(); insertSym(this, \" × \")'>×</button>" +
         "<button type='button' class='toolbar-btn math-btn' style='display: " + mathDisplay + ";' onmousedown='event.preventDefault(); insertSym(this, \" √ \")'>√</button>" +
+        "<input type='file' class='q-image-input' accept='image/*' style='display:none;' onchange='previewQImage(this)'><button type='button' class='toolbar-btn btn-teal' style='margin-right: 5px;' onclick='this.previousElementSibling.click()'>🖼️ إضافة صورة للسؤال</button>" +
+        "<div class='q-image-preview' style='display:none; margin-top: 8px; text-align: center; background: #e0f2f1; padding: 10px; border-radius: 5px; border: 1px dashed #009688;'>" +
+          "<img src='' style='max-height: 100px; max-width: 100%; object-fit: contain;'><br>" +
+          "<div style='margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap;'>" +
+             "<span style='font-size: 12px; font-weight: bold;'>تحكم بالصورة:</span>" +
+             "<select class='img-align' style='width: auto; padding: 4px; font-size: 12px;' onchange='scheduleSave()'><option value='center'>توسيط</option><option value='right'>يمين</option><option value='left'>يسار</option></select>" +
+             "<select class='img-size' style='width: auto; padding: 4px; font-size: 12px;' onchange='scheduleSave()'><option value='200px'>طبيعي (متوسط)</option><option value='120px'>صغير جداً</option><option value='350px'>كبير</option><option value='100%'>عرض كامل</option></select>" +
+             "<button type='button' class='btn btn-danger' style='padding: 4px 8px; font-size: 11px;' onclick='removeQImage(this)'>حذف الصورة ✖</button>" +
+          "</div>" +
+        "</div>" +
       "</div>" +
+
       "<textarea rows='2' class='q-text' placeholder='نص السؤال (يكتب هنا)'></textarea>" +
       "<textarea rows='2' class='q-answer' placeholder='اكتب الجواب النموذجي هنا' style='display: " + ansDisplay + "; margin-top: 5px; border: 1px solid #8e44ad; background-color: #f5eef8;'></textarea>" +
       "<div class='branches-container'></div>" +
       "<div style='margin-top: 8px; text-align: right;'>" +
-        "<button type='button' class='btn' style='background: #e0e0e0; color: #333; padding: 6px 12px; font-size: 12px; border: 1px solid #ccc;' onclick='addBranch(this)'>" + 
-        "➕ إضافة فرع (أ، ب، ج)" + 
-        "</button>" +
+        "<button type='button' class='btn' style='background: #e0e0e0; color: #333; padding: 6px 12px; font-size: 12px; border: 1px solid #ccc; margin-left: 5px;' onclick='addBranch(this, false)'>➕ إضافة فرع (أ، ب، ج)</button>" + 
+        "<button type='button' class='btn btn-info' style='padding: 6px 12px; font-size: 12px; border: none;' onclick='addBranch(this, true)'>🔗 إضافة فرع توصيل (List A & B)</button>" +
       "</div>";
       document.getElementById('q-container').appendChild(div);
       scheduleSave();
@@ -470,10 +467,11 @@
       count = blocks.length;
     }
     
-    function addBranch(btn) {
+    function addBranch(btn, isMatch) {
       let container = btn.parentElement.previousElementSibling;
       let branchCount = container.children.length;
-      let alphabet = ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح', 'ط', 'ي'];
+      let isEng = (document.getElementById('subjectType').value === 'english');
+      let alphabet = isEng ? ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] : ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح', 'ط', 'ي']; 
       let currentLetter = alphabet[branchCount] || '-';
       
       let currentMode = document.getElementById('paperMode').value;
@@ -481,23 +479,34 @@
       let ansDisplay = (showMode === 'always' || currentMode === 'table') ? 'block' : 'none';
       
       let branchDiv = document.createElement('div');
-      branchDiv.className = 'b-block';
+      branchDiv.className = isMatch ? 'b-block match-block' : 'b-block'; 
       branchDiv.style.marginTop = '10px';
       branchDiv.style.padding = '10px';
-      branchDiv.style.border = '1px dashed #aaa';
+      branchDiv.style.border = isMatch ? '1px dashed #00bcd4' : '1px dashed #aaa'; 
       branchDiv.style.borderRadius = '6px';
-      branchDiv.style.backgroundColor = '#f0f4f8';
+      branchDiv.style.backgroundColor = isMatch ? '#e0f7fa' : '#f0f4f8';
       
-      branchDiv.innerHTML = "<div style='display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; gap: 5px; flex-wrap: wrap;'>" +
+      let headerHTML = "<div style='display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; gap: 5px; flex-wrap: wrap;'>" +
         "<div style='flex:1; display:flex; align-items:center; gap: 5px;'>" +
           "<strong class='b-label' style='margin-left: 5px;'>فرع (" + currentLetter + ")</strong>" +
-          "<input type='text' class='b-title' placeholder='صيغة الفرع' style='flex-grow: 1; padding: 6px; font-size: 13px; border-color: red; color: red;'>" +
+          "<input type='text' class='b-title' placeholder='" + (isMatch ? "صيغة سؤال التوصيل (Match List A with List B)" : "صيغة الفرع") + "' style='flex-grow: 1; padding: 6px; font-size: 13px; border-color: red; color: red;'>" +
+          "<input type='text' class='b-marks' placeholder='الدرجة' style='width: 70px; padding: 6px; font-size: 13px;'>" +
         "</div>" +
         "<button type='button' class='btn btn-danger' style='padding: 4px 8px; font-size: 12px;' onclick='deleteBranch(this)'>حذف</button>" +
-      "</div>" +
-      "<textarea rows='2' class='b-text' placeholder='اكتب نص الفرع هنا...'></textarea>" +
-      "<textarea rows='1' class='b-answer' placeholder='جواب الفرع' style='display: " + ansDisplay + "; width: 100%; padding: 6px; font-size: 13px; border: 1px solid #8e44ad; background-color: #f5eef8; margin-top: 5px; border-radius: 4px;'></textarea>";
+      "</div>";
+
+      let bodyHTML = "";
+      if(isMatch) {
+          bodyHTML = "<div style='display: flex; gap: 10px; margin-bottom: 5px;'>" +
+            "<div style='flex: 1;'><strong style='display:block; font-size: 11px; color: #00838f;'>القائمة الأولى (List A)</strong><textarea rows='4' class='m-list-a' placeholder='1- ...\n2- ...\n3- ...' style='width: 100%; padding: 6px; font-size: 13px;'></textarea></div>" +
+            "<div style='flex: 1;'><strong style='display:block; font-size: 11px; color: #00838f;'>القائمة الثانية (List B)</strong><textarea rows='4' class='m-list-b' placeholder='a- ...\nb- ...\nc- ...' style='width: 100%; padding: 6px; font-size: 13px;'></textarea></div>" +
+          "</div>" +
+          "<textarea rows='1' class='b-answer' placeholder='جواب التوصيل (مثال: 1-b, 2-c, 3-a)' style='display: " + ansDisplay + "; width: 100%; padding: 6px; font-size: 13px; border: 1px solid #8e44ad; background-color: #f5eef8; border-radius: 4px;'></textarea>";
+      } else {
+          bodyHTML = "<textarea rows='2' class='b-text' placeholder='اكتب نص الفرع هنا...'></textarea><textarea rows='1' class='b-answer' placeholder='جواب الفرع' style='display: " + ansDisplay + "; width: 100%; padding: 6px; font-size: 13px; border: 1px solid #8e44ad; background-color: #f5eef8; margin-top: 5px; border-radius: 4px;'></textarea>";
+      }
       
+      branchDiv.innerHTML = headerHTML + bodyHTML;
       container.appendChild(branchDiv);
       scheduleSave();
     }
@@ -511,7 +520,8 @@
     }
     
     function updateBranches(container) {
-      let alphabet = ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح', 'ط', 'ي'];
+      let isEng = (document.getElementById('subjectType').value === 'english');
+      let alphabet = isEng ? ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] : ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح', 'ط', 'ي']; 
       let blocks = container.querySelectorAll('.b-block');
       blocks.forEach((block, index) => {
         let label = block.querySelector('.b-label');
@@ -537,6 +547,9 @@
       }
     }
     
+    // ==========================================
+    // 🖨️ دالة التجهيز للطباعة (تحديث A5 العملاق)
+    // ==========================================
     function preparePaper(isAnswerKey) {
       let pSize = document.getElementById('paperSize').value;
       let subjectType = document.getElementById('subjectType').value;
@@ -545,7 +558,9 @@
       let preview = document.getElementById('paper-preview');
       let isEnglish = (subjectType === 'english');
       
-      preview.style.fontSize = document.getElementById('fontSize').value;
+      // -- إعدادات الورقة والألوان الأساسية --
+      let baseFontSize = document.getElementById('fontSize').value;
+      preview.style.fontSize = pSize === 'A5' ? `calc(${baseFontSize} * 0.85)` : baseFontSize;
       preview.style.color = document.getElementById('textColor').value;
       preview.style.backgroundColor = document.getElementById('bgColor').value;
       
@@ -587,81 +602,38 @@
           preview.style.borderRadius = '0';
       }
 
-      preview.className = 'size-' + pSize;
+      preview.className = 'size-A4'; // الورقة الأساسية دائماً A4 للطباعة الدقيقة
       
-      let qsContainer = document.getElementById('pv-qs');
-      qsContainer.style.direction = isEnglish ? 'ltr' : 'rtl';
-      qsContainer.style.textAlign = isEnglish ? 'left' : 'right';
+      // -- جلب بيانات الترويسة والأساتذة --
+      let basmala = document.getElementById('basmala').value === 'yes';
+      let dirVal = document.getElementById('directorate').value.trim();
+      let school = document.getElementById('school').value.trim();
+      let examTypeBase = document.getElementById('examType').value.trim();
+      let subject = document.getElementById('subject').value.trim();
+      let grade = document.getElementById('grade').value.trim();
+      let year = document.getElementById('year').value.trim();
+      let dateVal = document.getElementById('examDate').value.trim();
+      let timeVal = document.getElementById('examTime').value.trim();
+      let teacherTitle = document.getElementById('teacherTitle').value.trim();
+      let teacherName = document.getElementById('teacherName').value.trim();
+      let examNote = document.getElementById('examNote').value.trim();
 
-      document.getElementById('pv-basmala').style.display = (document.getElementById('basmala').value === 'yes') ? 'block' : 'none';
-      
-      let dirVal = document.getElementById('directorate').value;
-      if(dirVal) {
-          document.getElementById('pv-directorate').style.display = 'inline';
-          document.getElementById('pv-directorate').innerText = dirVal;
-          document.getElementById('pv-dir-br').style.display = 'inline';
-      } else {
-          document.getElementById('pv-directorate').style.display = 'none';
-          document.getElementById('pv-dir-br').style.display = 'none';
-      }
-
-      let watermarkElem = document.getElementById('pv-watermark');
+      // -- جلب وتجهيز العلامة المائية --
+      let watermarkHTML = '';
       let wmType = document.getElementById('watermarkType').value;
-      
       if(wmType === 'text') {
-          let wmText = document.getElementById('watermarkText').value;
-          if(wmText) {
-              watermarkElem.style.display = 'flex';
-              watermarkElem.innerHTML = wmText;
-              watermarkElem.style.transform = 'translate(-50%, -50%) rotate(-45deg)';
-          } else {
-              watermarkElem.style.display = 'none';
-          }
+          let wmText = document.getElementById('watermarkText').value.trim();
+          if(wmText) watermarkHTML = `<div class="watermark" style="display:flex; transform: translate(-50%, -50%) rotate(-45deg);">${wmText}</div>`;
       } else {
           if(uploadedWatermarkImage) {
-              watermarkElem.style.display = 'flex';
-              watermarkElem.innerHTML = "<img src='" + uploadedWatermarkImage + "' style='max-width: 60%; max-height: 60%; opacity: 0.15; object-fit: contain;'>";
-              watermarkElem.style.transform = 'translate(-50%, -50%)'; 
-          } else {
-              watermarkElem.style.display = 'none';
+              watermarkHTML = `<div class="watermark" style="display:flex; transform: translate(-50%, -50%);"><img src="${uploadedWatermarkImage}" style="max-width: 60%; max-height: 60%; opacity: 0.15; object-fit: contain;"></div>`;
           }
       }
 
-      document.getElementById('pv-school').innerText = document.getElementById('school').value;
-      
-      let examTypeBase = document.getElementById('examType').value;
-      document.getElementById('pv-type').innerText = examTypeBase + (isAnswerKey ? " - (الجواب النموذجي)" : "");
-      
-      document.getElementById('pv-subject').innerText = document.getElementById('subject').value;
-      document.getElementById('pv-grade').innerText = document.getElementById('grade').value;
-      document.getElementById('pv-year').innerText = document.getElementById('year').value;
-      
-      // 🆕 إخفاء التاريخ والوقت إذا كانا فارغين
-      let dateVal = document.getElementById('examDate').value.trim();
-      if (dateVal) {
-          document.getElementById('pv-date').innerText = dateVal;
-          document.getElementById('pv-date-container').style.display = 'inline';
-      } else {
-          document.getElementById('pv-date-container').style.display = 'none';
-      }
-
-      let timeVal = document.getElementById('examTime').value.trim();
-      if (timeVal) {
-          document.getElementById('pv-time').innerText = timeVal;
-          document.getElementById('pv-time-container').style.display = 'inline';
-      } else {
-          document.getElementById('pv-time-container').style.display = 'none';
-      }
-
-      document.getElementById('pv-teacher-title').innerText = document.getElementById('teacherTitle').value;
-      document.getElementById('pv-teacher-name').innerText = document.getElementById('teacherName').value;
-      document.getElementById('pv-note').innerText = document.getElementById('examNote').value;
-      
-      let pq = document.getElementById('pv-qs');
-      pq.innerHTML = "";
-      
+      // -- بناء نص الأسئلة (HTML) لمرة واحدة --
+      let qsHTML = "";
       let blocks = document.querySelectorAll('.question-block');
-      let validBlocks = Array.from(blocks).filter(b => b.querySelector('.q-text').value.trim() !== "" || b.querySelector('.q-title').value.trim() !== "" || b.querySelectorAll('.b-block').length > 0);
+      let validBlocks = Array.from(blocks).filter(b => b.querySelector('.q-text').value.trim() !== "" || b.querySelector('.q-title').value.trim() !== "" || (b.querySelector('.q-image-preview') && b.querySelector('.q-image-preview').style.display === 'block') || b.querySelectorAll('.b-block').length > 0);
       
       let alphabet = isEnglish ? ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'] : ['أ', 'ب', 'ج', 'د', 'هـ', 'و', 'ز', 'ح', 'ط', 'ي'];
       let padSide = isEnglish ? "padding-left" : "padding-right";
@@ -673,26 +645,46 @@
          let thQ = isEnglish ? "Question" : "السؤال";
          let thA = isEnglish ? "Answer" : "الجواب";
          
-         let tableHTML = "<table class='exam-table'><tr><th style='width: 50%; text-align: center; background-color: " + qColor + ";'>" + thQ + "</th><th style='width: 50%; text-align: center; background-color: " + aColor + ";'>" + thA + "</th></tr>";
+         qsHTML += `<table class='exam-table'><tr><th style='width: 50%; text-align: center; background-color: ${qColor};'>${thQ}</th><th style='width: 50%; text-align: center; background-color: ${aColor};'>${thA}</th></tr>`;
          
          validBlocks.forEach((b, i) => {
             let qTitle = b.querySelector('.q-title').value.trim();
             let qText = b.querySelector('.q-text').value.replace(/\n/g, '<br>');
             let qAnswerVal = b.querySelector('.q-answer') ? b.querySelector('.q-answer').value.replace(/\n/g, '<br>') : "";
-            let qLabel = isEnglish ? "Q" + (i+1) + ". " : "س" + (i+1) + ": ";
+            let qMarks = b.querySelector('.q-marks') ? b.querySelector('.q-marks').value.trim() : "";
             
+            let qImgDiv = b.querySelector('.q-image-preview');
+            let qImgHtml = "";
+            if(qImgDiv && qImgDiv.style.display === 'block') {
+                let imgSrc = qImgDiv.querySelector('img').src;
+                let align = b.querySelector('.img-align') ? b.querySelector('.img-align').value : 'center';
+                let size = b.querySelector('.img-size') ? b.querySelector('.img-size').value : '200px';
+                qImgHtml = `<div style='text-align: ${align}; margin: 10px 0; width: 100%;'><img src='${imgSrc}' style='max-width: 100%; max-height: ${(size.includes('%') ? 'none' : size)}; width: ${(size === '100%' ? '100%' : 'auto')}; object-fit: contain; border-radius: 4px;'></div>`;
+            }
+
+            let qLabel = isEnglish ? "Q" + (i+1) + ". " : "س" + (i+1) + ": ";
+            let qMarksHtml = qMarks ? ` <span style='color: inherit; font-size: 0.9em; opacity: 0.8; white-space: nowrap;'>(${qMarks})</span>` : "";
             let finalTableAnswer = isAnswerKey ? qAnswerVal : "";
             
-            tableHTML += "<tr><td style='background-color: " + qColor + ";'><strong>" + qLabel + "</strong>" + (qTitle ? "<span style='color:inherit; opacity: 0.9; margin: 0 5px;'>"+qTitle+"</span><br>" : "") + qText + "</td><td style='background-color: " + aColor + ";'>" + finalTableAnswer + "</td></tr>";
+            qsHTML += `<tr><td style='background-color: ${qColor};'><strong>${qLabel}</strong>${qTitle ? `<span style='color:inherit; opacity: 0.9; margin: 0 5px;'>${qTitle}</span><br>` : ""}${qText}${qImgHtml}${qMarksHtml}</td><td style='background-color: ${aColor};'>${finalTableAnswer}</td></tr>`;
          });
-         tableHTML += "</table>";
-         pq.innerHTML = tableHTML;
+         qsHTML += "</table>";
       } else {
           validBlocks.forEach((b, i) => {
             let qTitle = b.querySelector('.q-title').value.trim();
             let qText = b.querySelector('.q-text').value.replace(/\n/g, '<br>');
+            let qMarks = b.querySelector('.q-marks') ? b.querySelector('.q-marks').value.trim() : "";
             let qAnswerVal = b.querySelector('.q-answer') ? b.querySelector('.q-answer').value.replace(/\n/g, '<br>') : "";
             
+            let qImgDiv = b.querySelector('.q-image-preview');
+            let qImgHtml = "";
+            if(qImgDiv && qImgDiv.style.display === 'block') {
+                let imgSrc = qImgDiv.querySelector('img').src;
+                let align = b.querySelector('.img-align') ? b.querySelector('.img-align').value : 'center';
+                let size = b.querySelector('.img-size') ? b.querySelector('.img-size').value : '200px';
+                qImgHtml = `<div style='text-align: ${align}; margin: 12px 0; width: 100%;'><img src='${imgSrc}' style='max-width: 100%; max-height: ${(size.includes('%') ? 'none' : size)}; width: ${(size === '100%' ? '100%' : 'auto')}; object-fit: contain; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid #ddd;'></div>`;
+            }
+
             let qNum = (i+1).toString();
             let qLabel = isEnglish ? "Q" + qNum + ". " : "س" + qNum + ": ";
             
@@ -706,10 +698,11 @@
                 else if(divStyle === 'floral') customDivider = "<div style='text-align:center; letter-spacing: 15px; margin-top: 15px; font-size: 1.2em;'>🌺 🌺 🌺</div>";
             }
             
-            let titleHtml = qTitle ? "<span style='color: inherit; opacity: 0.9; margin: 0 8px; font-size: 1em;'>" + qTitle + "</span>" : "";
-            let mainTextHtml = qText ? "<div style='font-size: 1em; line-height: 1.5; " + padSide + ": 15px; margin-top: 4px;'>" + qText + "</div>" : "";
+            let titleHtml = qTitle ? `<span style='color: inherit; opacity: 0.9; margin: 0 8px; font-size: 1em;'>${qTitle}</span>` : "";
+            let mainTextHtml = qText ? `<div style='font-size: 1em; line-height: 1.5; ${padSide}: 15px; margin-top: 4px;'>${qText}</div>` : "";
+            let qMarksHtml = qMarks ? `<span style='float: ${floatSide}; font-size: 0.95em; font-weight: bold; margin: 0 10px;'>(${qMarks})</span>` : "";
             
-            let mainAnswerHtml = (isAnswerKey && qAnswerVal) ? "<div style='margin: 8px 15px 0 15px; color: #8e44ad; font-weight: bold; padding: 5px; border-radius: 4px; border: 1px dashed #8e44ad; background: rgba(142,68,173,0.05);'>الجواب: " + qAnswerVal + "</div>" : "";
+            let mainAnswerHtml = (isAnswerKey && qAnswerVal) ? `<div style='margin: 8px 15px 0 15px; color: #8e44ad; font-weight: bold; padding: 5px; border-radius: 4px; border: 1px dashed #8e44ad; background: rgba(142,68,173,0.05);'>الجواب: ${qAnswerVal}</div>` : "";
             
             let branchesHtml = "";
             let bBlocks = b.querySelectorAll('.b-block');
@@ -717,29 +710,113 @@
             
             bBlocks.forEach(bb => {
               let bTitleVal = bb.querySelector('.b-title').value.trim();
-              let bTextVal = bb.querySelector('.b-text').value.replace(/\n/g, '<br>');
+              let bTextVal = bb.querySelector('.b-text') ? bb.querySelector('.b-text').value.replace(/\n/g, '<br>') : "";
+              let bMarksVal = bb.querySelector('.b-marks') ? bb.querySelector('.b-marks').value.trim() : "";
               let bAnswerVal = bb.querySelector('.b-answer') ? bb.querySelector('.b-answer').value.replace(/\n/g, '<br>') : "";
               
-              if(bTitleVal !== "" || bTextVal.trim() !== "") {
-                let bTitleHtml = bTitleVal ? "<span style='color: inherit; opacity: 0.9; margin: 0 8px; font-size: 1em;'>" + bTitleVal + "</span>" : "";
-                let branchLabel = isEnglish ? alphabet[bIndex] + ") " : alphabet[bIndex] + " / ";
-                
-                let bAnswerHtml = (isAnswerKey && bAnswerVal) ? "<div style='margin: 5px 25px 0 25px; color: #8e44ad; font-weight: bold; padding: 4px; border: 1px dashed #8e44ad; background: rgba(142,68,173,0.05);'>الجواب: " + bAnswerVal + "</div>" : "";
-                
-                branchesHtml += "<div style='margin-top: 12px; " + padSide + ": 20px; font-size: 1em; overflow: hidden;'>" +
-                  "<div style='margin-bottom: 4px;'><strong>" + branchLabel + "</strong>" + bTitleHtml + "</div>" +
-                  "<div style='" + padSide + ": 25px; line-height: 1.5;'>" + bTextVal + "</div>" +
-                  bAnswerHtml +
-                "</div>";
-                bIndex++;
+              let bTitleHtml = bTitleVal ? `<span style='color: inherit; opacity: 0.9; margin: 0 8px; font-size: 1em;'>${bTitleVal}</span>` : "";
+              let branchLabel = isEnglish ? alphabet[bIndex] + ") " : alphabet[bIndex] + " / ";
+              let bMarksHtml = bMarksVal ? `<span style='float: ${floatSide}; font-size: 0.9em; font-weight: bold; margin: 0 10px;'>(${bMarksVal})</span>` : "";
+              let bAnswerHtml = (isAnswerKey && bAnswerVal) ? `<div style='margin: 5px 25px 0 25px; color: #8e44ad; font-weight: bold; padding: 4px; border: 1px dashed #8e44ad; background: rgba(142,68,173,0.05);'>الجواب: ${bAnswerVal}</div>` : "";
+              
+              if(bb.classList.contains('match-block')) {
+                  let listA = bb.querySelector('.m-list-a') ? bb.querySelector('.m-list-a').value.replace(/\n/g, '<br>') : "";
+                  let listB = bb.querySelector('.m-list-b') ? bb.querySelector('.m-list-b').value.replace(/\n/g, '<br>') : "";
+                  if(bTitleVal !== "" || listA !== "" || listB !== "") {
+                      let tableTitleA = isEnglish ? "List A" : "القائمة A";
+                      let tableTitleB = isEnglish ? "List B" : "القائمة B";
+                      branchesHtml += `<div style='margin-top: 12px; ${padSide}: 20px; font-size: 1em; overflow: hidden;'>
+                        <div style='margin-bottom: 4px;'>${bMarksHtml}<strong>${branchLabel}</strong>${bTitleHtml}</div>
+                        <div style='display: flex; justify-content: space-between; margin: 10px 25px; gap: 20px;'>
+                           <div style='flex: 1; text-align: center;'><strong style='text-decoration: underline;'>${tableTitleA}</strong><div style='text-align: ${isEnglish ? 'left' : 'right'}; margin-top: 8px; line-height: 1.6;'>${listA}</div></div>
+                           <div style='flex: 1; text-align: center;'><strong style='text-decoration: underline;'>${tableTitleB}</strong><div style='text-align: ${isEnglish ? 'left' : 'right'}; margin-top: 8px; line-height: 1.6;'>${listB}</div></div>
+                        </div>
+                        ${bAnswerHtml}
+                      </div>`;
+                      bIndex++;
+                  }
+              } else {
+                  if(bTitleVal !== "" || bTextVal.trim() !== "") {
+                      branchesHtml += `<div style='margin-top: 12px; ${padSide}: 20px; font-size: 1em; overflow: hidden;'>
+                        <div style='margin-bottom: 4px;'>${bMarksHtml}<strong>${branchLabel}</strong>${bTitleHtml}</div>
+                        <div style='${padSide}: 25px; line-height: 1.5;'>${bTextVal}</div>
+                        ${bAnswerHtml}
+                      </div>`;
+                      bIndex++;
+                  }
               }
             });
             
-            pq.innerHTML += "<div style='margin-bottom: 15px; padding-bottom: 15px; " + borderStyle + "'>" +
-              "<div style='margin-bottom: 8px; overflow: hidden;'><strong style='font-size: 1.1em;'>" + qLabel + "</strong> " + titleHtml + "</div>" +
-              mainTextHtml + mainAnswerHtml + branchesHtml + customDivider +
-            "</div>";
+            qsHTML += `<div style='margin-bottom: 15px; padding-bottom: 15px; ${borderStyle}'>
+              <div style='margin-bottom: 8px; overflow: hidden;'>${qMarksHtml}<strong style='font-size: 1.1em;'>${qLabel}</strong> ${titleHtml}</div>
+              ${mainTextHtml}${qImgHtml}${mainAnswerHtml}${branchesHtml}${customDivider}
+            </div>`;
           });
+      }
+
+      // -- دالة بناء الهيكل النهائي لكل نموذج (أو كامل) --
+      function buildModelBox(modelLabel) {
+         let typeStr = examTypeBase + (isAnswerKey ? " - (الجواب النموذجي)" : "");
+         
+         return `
+         <div style="position: relative; flex: 1; display: flex; flex-direction: column; padding: 10px 0; overflow: hidden; width: 100%;">
+            ${watermarkHTML}
+            <div style="position: relative; z-index: 2; display: flex; flex-direction: column; height: 100%;">
+                
+                ${basmala ? '<div style="text-align: center; font-weight: bold; font-size: 1em; margin-bottom: 5px; direction: rtl;">بسم الله الرحمن الرحيم</div>' : ''}
+                
+                <div class="paper-header">
+                  <div class="header-right">
+                    جمهورية العراق<br>وزارة التربية<br>
+                    ${dirVal ? `<span>${dirVal}</span><br>` : ''}
+                    المدرسة: <span>${school}</span>
+                  </div>
+                  <div class="header-center">
+                    <div class="exam-type-title" style="margin-bottom: 2px;">${typeStr}</div>
+                    ${modelLabel ? `<div style="font-size: 1.1em; font-weight: bold; margin-bottom: 5px;">(${modelLabel})</div>` : ''}
+                    للعام الدراسي <span>${year}</span>
+                    <hr style="border: 0; border-top: 1px solid currentColor; margin: 5px 0; opacity: 0.5;">
+                  </div>
+                  <div class="header-left">
+                    المادة: <span>${subject}</span><br>
+                    الصف: <span>${grade}</span><br>
+                    ${dateVal ? `التاريخ: <span>${dateVal}</span><br>` : ''}
+                    ${timeVal ? `الوقت: <span>${timeVal}</span>` : ''}
+                  </div>
+                </div>
+                
+                <div style="flex-grow: 1; direction: ${isEnglish ? 'ltr' : 'rtl'}; text-align: ${isEnglish ? 'left' : 'right'};">
+                   ${qsHTML}
+                </div>
+                
+                <div style="margin-top: auto; padding-top: 10px; display: flex; justify-content: space-between; align-items: flex-end; font-weight: bold; font-size: 1em; direction: rtl; width: 100%;">
+                  <div style="width: 25%;"></div>
+                  <div style="width: 50%; text-align: center;">
+                    <span>${examNote}</span>
+                  </div>
+                  <div style="width: 25%; text-align: left;">
+                    <div>${teacherTitle}</div>
+                    <div style="margin-top: 5px;">${teacherName}</div>
+                  </div>
+                </div>
+                <div style="text-align: center; font-size: 0.7em; opacity: 0.5; margin-top: 10px; padding-top: 5px; border-top: 1px dashed currentColor;">
+                  تم الإنشاء بواسطة أداة صانع الأسئلة - تطوير: محمد باقر (قناة تبسيط التقنية)
+                </div>
+                
+            </div>
+         </div>
+         `;
+      }
+
+      // -- دمج الأجزاء داخل المعاينة --
+      if (pSize === 'A5') {
+          // استنساخ النموذج مرتين مع خط فاصل للقص
+          preview.innerHTML = buildModelBox('نموذج أ') + 
+                              `<hr style="border: 0; border-top: 2px dashed currentColor; margin: 15px 0; opacity: 0.8; width: 100%;">` + 
+                              buildModelBox('نموذج ب');
+      } else {
+          // نموذج اعتيادي كامل على A4
+          preview.innerHTML = buildModelBox('');
       }
     }
 
@@ -779,8 +856,15 @@
       }, 300);
     }
 
+    // ═══════════════════════════════════════════
+    // 💾 نظام الحفظ التلقائي القوي (مُصحّح 100%)
+    // ═══════════════════════════════════════════
     function saveToLocal() {
       try {
+        // [الحل السحري]: تحويل النصوص المكتوبة إلى Attribute داخل الـ HTML حتى تنحفظ ككود
+        document.querySelectorAll('#q-container input').forEach(el => el.setAttribute('value', el.value));
+        document.querySelectorAll('#q-container textarea').forEach(el => el.textContent = el.value);
+
         const data = {
           questionsHTML: document.getElementById('q-container').innerHTML,
           count: count,
@@ -838,6 +922,8 @@
         if (data.questionsHTML) {
           document.getElementById('q-container').innerHTML = data.questionsHTML;
           count = data.count || 0;
+          // إعادة تفعيل النصوص بداخل الحقول بعد استرجاعها
+          document.querySelectorAll('#q-container textarea').forEach(el => el.value = el.textContent);
         }
         if (data.paperSize) document.getElementById('paperSize').value = data.paperSize;
         if (data.subjectType) document.getElementById('subjectType').value = data.subjectType;
