@@ -327,13 +327,9 @@
         
         <div class="card">
           <h3>الأسئلة</h3>
-          <div id="math-toolbar" style="display: none; margin-bottom: 10px; background: #eee; padding: 10px; border-radius: 8px;">
-            <strong>أدوات الرياضيات: </strong>
-            <button type="button" class="toolbar-btn" onclick="insertSymGlobal('²')">x²</button>
-            <button type="button" class="toolbar-btn" onclick="insertSymGlobal('³')">x³</button>
-            <button type="button" class="toolbar-btn" onclick="insertSymGlobal('π')">π</button>
-            <button type="button" class="toolbar-btn" onclick="insertSymGlobal('°')">°</button>
-            <button type="button" class="toolbar-btn" onclick="insertSymGlobal('≈')">≈</button>
+          <div id="math-toolbar" style="display: none; margin-bottom: 10px; background: #eeeeee; padding: 10px; border-radius: 8px;">
+            <div style="font-weight: bold; font-size: 13px; color: #455a64; margin-bottom: 6px;">🧮 رموز الرياضيات — اضغط على الرمز لينزل بمكان المؤشر</div>
+            <div id="math-toolbar-rows"></div>
           </div>
           <div id="variant-tabs" style="display: none; margin-bottom: 10px; gap: 8px;">
             <button type="button" id="tab-a" class="variant-tab active" onclick="switchVariant('a')">📄 النموذج أ</button>
@@ -456,6 +452,46 @@
             reader.readAsDataURL(file);
         }
     });
+
+    // ── رموز الرياضيات (مستوى الابتدائي) ──
+    const MATH_SYMBOLS = [
+      { label: 'العمليات', items: ['+', '−', '×', '÷', '=', '≠'] },
+      { label: 'المقارنة', items: ['<', '>', '≤', '≥', '≈'] },
+      { label: 'الكسور', items: ['½', '⅓', '¼', '⅔', '¾'] },
+      { label: 'الأُسس', items: ['²', '³', '⁴', '⁵', '⁶'] },
+      { label: 'الجذور', items: ['√', '∛'] },
+      { label: 'الهندسة', items: ['∠', '°', '∟', '△', '□', '○', 'π'] },
+      { label: 'أخرى', items: ['%', ')', '(', '٫'] },
+      { label: 'الأرقام', items: ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'] }
+    ];
+
+    function buildMathToolbar() {
+      const host = document.getElementById('math-toolbar-rows');
+      if (!host) return;
+      host.innerHTML = '';
+      MATH_SYMBOLS.forEach(function(group) {
+        const row = document.createElement('div');
+        row.style.cssText = 'display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-bottom: 4px;';
+
+        const lbl = document.createElement('strong');
+        lbl.textContent = group.label + ':';
+        lbl.style.cssText = 'font-size: 12px; min-width: 72px; color: #455a64;';
+        row.appendChild(lbl);
+
+        group.items.forEach(function(sym) {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'toolbar-btn';
+          b.textContent = sym;
+          b.style.cssText = 'min-width: 30px; font-size: 14px; padding: 4px 6px;';
+          b.addEventListener('mousedown', function(e) { e.preventDefault(); });
+          b.addEventListener('click', function() { insertSymGlobal(sym); });
+          row.appendChild(b);
+        });
+
+        host.appendChild(row);
+      });
+    }
 
     function toggleMathToolbar() {
       let type = document.getElementById('subjectType').value;
@@ -665,12 +701,22 @@
     }
 
     function insertSymGlobal(sym) {
-      if(activeInput) {
-        let s = activeInput.selectionStart, e = activeInput.selectionEnd, v = activeInput.value;
-        activeInput.value = v.substring(0, s) + sym + v.substring(e);
-        activeInput.focus(); activeInput.selectionEnd = s + sym.length;
-        scheduleSave();
+      // إذا ما فيه حقل محدَّد، ننزل الرمز بأول سؤال بالنموذج الحالي
+      let target = activeInput;
+      if (!target || !document.body.contains(target)) {
+        target = document.querySelector('#q-container-' + currentVariant + ' .q-text');
       }
+      if (!target) {
+        showToast('⚠️ أضف سؤالاً أولاً حتى ينزل الرمز', true);
+        return;
+      }
+      const s = target.selectionStart || 0;
+      const e = target.selectionEnd || 0;
+      const v = target.value;
+      target.value = v.substring(0, s) + sym + v.substring(e);
+      target.focus();
+      target.selectionEnd = s + sym.length;
+      scheduleSave();
     }
     
     // ═══════════════════════════════════════════
@@ -1470,6 +1516,7 @@
     // 🚀 التهيئة
     // ═══════════════════════════════════════════
     buildThemeGallery();
+    buildMathToolbar();
     const hadSavedData = loadFromLocal();
     applyVariantUI();
     if (!hadSavedData) {
