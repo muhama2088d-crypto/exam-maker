@@ -123,6 +123,15 @@
             <button class="btn" style="background: #607d8b; color: white; padding: 8px 12px; font-size: 14px; border-radius: 8px;" onclick="clearAll()">🗑 مسح</button>
           </div>
         </h2>
+
+        <div class="card" style="background: #fff8e1; border: 2px dashed #ffb74d; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <strong style="color: #e65100; font-size: 15px;">🔢 نوع الأرقام في الورقة:</strong>
+          <select id="numeralStyle" style="max-width: 260px; font-weight: bold; background: #fff;">
+            <option value="hindi" selected>هندية (٠١٢٣٤٥٦٧٨٩)</option>
+            <option value="western">عربية (0123456789)</option>
+          </select>
+          <span style="font-size: 12px; color: #795548;">يتحكم بكل الأرقام: الترقيم، الدرجات، السنة الدراسية، التاريخ، ونصوص الأسئلة</span>
+        </div>
         
         <div class="card">
           <h3>إعدادات الورقة والمادة</h3>
@@ -132,13 +141,6 @@
               <select id="paperSize" onchange="onPaperSizeChange()">
                 <option value="A4">A4 - ورقة كاملة</option>
                 <option value="A5">A5 - نصف ورقة</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>نوع الأرقام</label>
-              <select id="numeralStyle">
-                <option value="hindi" selected>هندية (٠١٢٣٤٥٦٧٨٩) — للابتدائي</option>
-                <option value="western">عربية (0123456789)</option>
               </select>
             </div>
             <div class="form-group">
@@ -906,6 +908,22 @@
       return style === 'hindi' ? toHindiDigits(str) : toWesternDigits(str);
     }
 
+    // يحوّل الأرقام بكل النصوص داخل HTML — بدون لمس الأنماط (style/class/id)
+    function applyNumeralsToHtml(html) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      const walker = document.createTreeWalker(tmp, NodeFilter.SHOW_TEXT, null);
+      const nodes = [];
+      let n;
+      while ((n = walker.nextNode())) nodes.push(n);
+      nodes.forEach(function(node) {
+        if (node.nodeValue && /[0-9٠-٩]/.test(node.nodeValue)) {
+          node.nodeValue = numeralize(node.nodeValue);
+        }
+      });
+      return tmp.innerHTML;
+    }
+
     function escHtml(s) {
       return String(s == null ? '' : s)
         .replace(/&/g, '&amp;')
@@ -1170,9 +1188,10 @@
       preview.className = isA5 ? 'duo' : 'single';
 
       // A5: ورقة A4 طولية مقسومة أفقياً — النصف الأعلى «أ» والأسفل «ب»، وكل واحد يبدأ من س1
-      preview.innerHTML = isA5
+      const sheets = isA5
         ? buildSheetHTML(isAnswerKey, true, 'a') + buildSheetHTML(isAnswerKey, true, 'b')
         : buildSheetHTML(isAnswerKey, false, 'a');
+      preview.innerHTML = applyNumeralsToHtml(sheets);
     }
 
     // تحذير إذا كان محتوى أحد النموذجين أطول من نصف الورقة
