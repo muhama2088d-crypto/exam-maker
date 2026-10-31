@@ -135,6 +135,13 @@
               </select>
             </div>
             <div class="form-group">
+              <label>نوع الأرقام</label>
+              <select id="numeralStyle">
+                <option value="hindi" selected>هندية (٠١٢٣٤٥٦٧٨٩) — للابتدائي</option>
+                <option value="western">عربية (0123456789)</option>
+              </select>
+            </div>
+            <div class="form-group">
               <label>تخصيص المادة</label>
               <select id="subjectType" onchange="toggleMathToolbar()">
                 <option value="arabic">عربي ومواد عامة</option>
@@ -880,6 +887,25 @@
     // ═══════════════════════════════════════════
     // 🖨 بناء الورقة — نسخة A4 واحدة أو نسختين A5 على ورقة A4
     // ═══════════════════════════════════════════
+    // ── الأرقام: هندية (٠١٢٣) أو عربية (0123) ──
+    const HINDI_DIGITS = '٠١٢٣٤٥٦٧٨٩';
+    function toHindiDigits(str) {
+      return String(str)
+        .replace(/\.(?=[0-9٠-٩])/g, '٫')
+        .replace(/[0-9]/g, function(d) { return HINDI_DIGITS[+d]; });
+    }
+    function toWesternDigits(str) {
+      return String(str)
+        .replace(/[٠-٩]/g, function(d) { return String(HINDI_DIGITS.indexOf(d)); })
+        .replace(/٫/g, '.');
+    }
+    // يحوّل أي نص حسب اختيار المستخدم
+    function numeralize(str) {
+      const el = document.getElementById('numeralStyle');
+      const style = el ? el.value : 'hindi';
+      return style === 'hindi' ? toHindiDigits(str) : toWesternDigits(str);
+    }
+
     function escHtml(s) {
       return String(s == null ? '' : s)
         .replace(/&/g, '&amp;')
@@ -905,7 +931,7 @@
       const marks = (node.querySelector('.s-marks').value || '').trim();
       const colorEl = node.querySelector('.s-color');
       const color = colorEl ? colorEl.value : '#1565c0';
-      const marksHtml = marks ? ' <span style="font-size: 0.82em; font-weight: normal;">(' + escHtml(marks) + ')</span>' : '';
+      const marksHtml = marks ? ' <span style="font-size: 0.82em; font-weight: normal;">(' + escHtml(numeralize(marks)) + ')</span>' : '';
       return '<div class="paper-section" style="text-align: center; margin: 18px 0 10px; color: ' + color +
              '; font-weight: bold; font-size: 1.05em;">' +
              escHtml(title) + marksHtml + '</div>';
@@ -944,7 +970,7 @@
             const colorEl = node.querySelector('.s-color');
             const color = colorEl ? colorEl.value : '#1565c0';
             tableHTML += "<tr><td colspan='2' style='text-align: center; background-color: " + qColor + "; color: " + color + "; font-weight: bold;'>" +
-              escHtml(title) + (marks ? ' (' + escHtml(marks) + ')' : '') + "</td></tr>";
+              escHtml(title) + (marks ? ' (' + escHtml(numeralize(marks)) + ')' : '') + "</td></tr>";
             return;
           }
 
@@ -956,8 +982,8 @@
           const qAnswerVal = qAnswerEl ? escBr(qAnswerEl.value) : "";
           const qMarksEl = b.querySelector('.q-marks');
           const qMarks = qMarksEl ? qMarksEl.value.trim() : "";
-          const qLabel = isEnglish ? "Q" + qIndex + ". " : "س" + qIndex + ": ";
-          const qMarksHtml = qMarks ? " <span style='color: inherit; font-size: 0.9em; opacity: 0.8; white-space: nowrap;'>(" + escHtml(qMarks) + ")</span>" : "";
+          const qLabel = isEnglish ? "Q" + numeralize(qIndex) + ". " : "س" + numeralize(qIndex) + ": ";
+          const qMarksHtml = qMarks ? " <span style='color: inherit; font-size: 0.9em; opacity: 0.8; white-space: nowrap;'>(" + escHtml(numeralize(qMarks)) + ")</span>" : "";
           const finalTableAnswer = isAnswerKey ? qAnswerVal : "";
 
           tableHTML += "<tr><td style='background-color: " + qColor + ";'><strong>" + qLabel + "</strong>" +
@@ -983,7 +1009,7 @@
         const qAnswerEl = b.querySelector('.q-answer');
         const qAnswerVal = qAnswerEl ? escBr(qAnswerEl.value) : "";
 
-        const qLabel = isEnglish ? "Q" + qIndex + ". " : "س" + qIndex + ": ";
+        const qLabel = isEnglish ? "Q" + numeralize(qIndex) + ". " : "س" + numeralize(qIndex) + ": ";
 
         let borderStyle = "";
         let customDivider = "";
@@ -998,7 +1024,7 @@
 
         const titleHtml = qTitle ? "<span style='color: inherit; opacity: 0.9; margin: 0 8px; font-size: 1em;'>" + escHtml(qTitle) + "</span>" : "";
         const mainTextHtml = qText ? "<div style='font-size: 1em; line-height: 1.5; " + padSide + ": 15px; margin-top: 4px;'>" + qText + "</div>" : "";
-        const qMarksHtml = qMarks ? "<span style='float: " + floatSide + "; font-size: 0.95em; font-weight: bold; margin: 0 10px;'>(" + escHtml(qMarks) + ")</span>" : "";
+        const qMarksHtml = qMarks ? "<span style='float: " + floatSide + "; font-size: 0.95em; font-weight: bold; margin: 0 10px;'>(" + escHtml(numeralize(qMarks)) + ")</span>" : "";
         const mainAnswerHtml = (isAnswerKey && qAnswerVal) ? "<div style='margin: 8px 15px 0 15px; color: #8e44ad; font-weight: bold; padding: 5px; border-radius: 4px; border: 1px dashed #8e44ad; background: rgba(142,68,173,0.05);'>الجواب: " + qAnswerVal + "</div>" : "";
 
         let branchesHtml = "";
@@ -1015,7 +1041,7 @@
           if (bTitleVal !== "" || bTextVal.trim() !== "") {
             const bTitleHtml = bTitleVal ? "<span style='color: inherit; opacity: 0.9; margin: 0 8px; font-size: 1em;'>" + escHtml(bTitleVal) + "</span>" : "";
             const branchLabel = isEnglish ? alphabet[bIndex] + ") " : alphabet[bIndex] + " / ";
-            const bMarksHtml = bMarksVal ? "<span style='float: " + floatSide + "; font-size: 0.9em; font-weight: bold; margin: 0 10px;'>(" + escHtml(bMarksVal) + ")</span>" : "";
+            const bMarksHtml = bMarksVal ? "<span style='float: " + floatSide + "; font-size: 0.9em; font-weight: bold; margin: 0 10px;'>(" + escHtml(numeralize(bMarksVal)) + ")</span>" : "";
             const bAnswerHtml = (isAnswerKey && bAnswerVal) ? "<div style='margin: 5px 25px 0 25px; color: #8e44ad; font-weight: bold; padding: 4px; border: 1px dashed #8e44ad; background: rgba(142,68,173,0.05);'>الجواب: " + bAnswerVal + "</div>" : "";
 
             branchesHtml += "<div style='margin-top: 12px; " + padSide + ": 20px; font-size: 1em; overflow: hidden;'>" +
@@ -1099,8 +1125,8 @@
       const leftLines = [
         subjectVal ? 'المادة: ' + escHtml(subjectVal) : '',
         gradeVal ? 'الصف: ' + escHtml(gradeVal) : '',
-        dateVal ? 'التاريخ: ' + escHtml(dateVal) : '',
-        timeVal ? 'الوقت: ' + escHtml(timeVal) : ''
+        dateVal ? 'التاريخ: ' + escHtml(numeralize(dateVal)) : '',
+        timeVal ? 'الوقت: ' + escHtml(numeralize(timeVal)) : ''
       ].filter(Boolean);
 
       const headerHtml =
@@ -1110,7 +1136,7 @@
           '<div class="header-center">' +
             '<div class="exam-type-title">' + examTypeHtml + '</div>' +
             (isA5 ? '<div style="font-size: 1em;">(نموذج ' + (variant === 'b' ? 'ب' : 'أ') + ')</div>' : '') +
-            (yearVal ? 'للعام الدراسي ' + escHtml(yearVal) : '') +
+            (yearVal ? 'للعام الدراسي ' + escHtml(numeralize(yearVal)) : '') +
           '</div>' +
           '<div class="header-left">' + leftLines.join('<br>') + '</div>' +
         '</div>';
@@ -1299,6 +1325,7 @@
         count: count,
         watermarkImage: uploadedWatermarkImage,
         paperSize: document.getElementById('paperSize').value,
+        numeralStyle: document.getElementById('numeralStyle').value,
         subjectType: document.getElementById('subjectType').value,
         paperMode: document.getElementById('paperMode').value,
         showAnswersMode: document.getElementById('showAnswersMode').value,
@@ -1360,6 +1387,7 @@
 
         // 1) الإعدادات أولاً — لأن بناء الأسئلة يعتمد على النمط المختار
         if (data.paperSize) document.getElementById('paperSize').value = data.paperSize;
+        if (data.numeralStyle) document.getElementById('numeralStyle').value = data.numeralStyle;
         if (data.subjectType) document.getElementById('subjectType').value = data.subjectType;
         if (data.paperMode) document.getElementById('paperMode').value = data.paperMode;
         if (data.showAnswersMode) document.getElementById('showAnswersMode').value = data.showAnswersMode;
